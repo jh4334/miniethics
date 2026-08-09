@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 앱 아이콘 -->
+  <rect width="512" height="512" rx="110" fill="#7c5cff"/>
+  <rect x="26" y="26" width="460" height="460" rx="96" fill="#9d85ff"/>
+  <!-- 방패 -->
+  <path d="M256 76 q80 42 150 42 q0 190 -150 318 q-150 -128 -150 -318 q70 0 150 -42 z" fill="#fff"/>
+  <path d="M256 106 q68 36 122 40 q-4 158 -122 262 q-118 -104 -122 -262 q54 -4 122 -40 z" fill="#ffd93d"/>
+  <!-- 로봇 얼굴 -->
+  <rect x="166" y="196" width="180" height="120" rx="50" fill="#3a3352"/>
+  <circle cx="216" cy="248" r="18" fill="#6ee7c8"/>
+  <circle cx="296" cy="248" r="18" fill="#6ee7c8"/>
+  <path d="M232 284 q24 16 48 0" stroke="#6ee7c8" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <rect x="248" y="158" width="16" height="40" rx="8" fill="#3a3352"/>
+  <circle cx="256" cy="152" r="16" fill="#ff8fb1"/>
+</svg>
