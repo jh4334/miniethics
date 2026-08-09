@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 8차시 캐릭터 (플레이스홀더) - char08.png로 교체하면 그림이 바뀝니다 -->
+  <rect x="116" y="124" width="280" height="270" rx="110" fill="#fff" stroke="#ffd93d" stroke-width="14"/>
+  <rect x="166" y="184" width="180" height="110" rx="46" fill="#3a3352"/>
+  <circle cx="216" cy="232" r="16" fill="#ffd93d"/>
+  <circle cx="296" cy="232" r="16" fill="#ffd93d"/>
+  <path d="M236 264 q20 14 40 0" stroke="#ffd93d" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <rect x="248" y="72" width="16" height="52" rx="8" fill="#3a3352"/>
+  <circle cx="256" cy="66" r="20" fill="#ffd93d"/>
+  <ellipse cx="256" cy="420" rx="70" ry="22" fill="#ffd93d"/>
+  <text x="256" y="360" font-size="64" text-anchor="middle">⚖️</text>
+</svg>

@@ -11,7 +11,17 @@ const BASE = {
   /** 2차시 과일박사 로봇 '냠봇' */
   nyambot: './assets/game02/nyambot',
   /** 3차시 악당 '정보도둑' */
-  thief: './assets/game03/thief'
+  thief: './assets/game03/thief',
+  /** 4~12차시 등장 캐릭터 (각 차시 스토리·게임에서 사용) */
+  char04: './assets/game04/char04',
+  char05: './assets/game05/char05',
+  char06: './assets/game06/char06',
+  char07: './assets/game07/char07',
+  char08: './assets/game08/char08',
+  char09: './assets/game09/char09',
+  char10: './assets/game10/char10',
+  char11: './assets/game11/char11',
+  char12: './assets/game12/char12'
 } as const;
 
 export type AssetKey = keyof typeof BASE;

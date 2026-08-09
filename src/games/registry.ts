@@ -20,8 +20,30 @@ export interface MiniGame {
 import { game01 } from './game01-labeling';
 import { game02 } from './game02-bias';
 import { game03 } from './game03-privacy';
+import { game04 } from './game04-deepfake';
+import { game05 } from './game05-filterbubble';
+import { game06 } from './game06-copyright';
+import { game07 } from './game07-chatbot';
+import { game08 } from './game08-balance';
+import { game09 } from './game09-fairness';
+import { game10 } from './game10-responsibility';
+import { game11 } from './game11-factcheck';
+import { game12 } from './game12-boss';
 
-const GAMES: MiniGame[] = [game01, game02, game03];
+const GAMES: MiniGame[] = [
+  game01,
+  game02,
+  game03,
+  game04,
+  game05,
+  game06,
+  game07,
+  game08,
+  game09,
+  game10,
+  game11,
+  game12
+];
 
 export function getGame(lessonId: number): MiniGame | undefined {
   return GAMES.find((g) => g.lessonId === lessonId);

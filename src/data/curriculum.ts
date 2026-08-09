@@ -1,6 +1,15 @@
 // 12차시 커리큘럼 데이터
-// 1~3차시: 게임 플레이 가능 (스토리·퀴즈 완성)
-// 4~12차시: 월드맵에 표시되는 메타데이터만 (추후 구현)
+// 1~3차시: 이 파일에 인라인, 4~12차시: src/data/lessons/lessonNN.ts 개별 파일
+
+import { lesson04 } from './lessons/lesson04';
+import { lesson05 } from './lessons/lesson05';
+import { lesson06 } from './lessons/lesson06';
+import { lesson07 } from './lessons/lesson07';
+import { lesson08 } from './lessons/lesson08';
+import { lesson09 } from './lessons/lesson09';
+import { lesson10 } from './lessons/lesson10';
+import { lesson11 } from './lessons/lesson11';
+import { lesson12 } from './lessons/lesson12';
 
 export interface DialogLine {
   speaker: string;
@@ -275,187 +284,15 @@ export const LESSONS: Lesson[] = [
     x: 44,
     y: 68
   },
-  // ---------- 4차시 이후: 준비 중 ----------
-  {
-    id: 4,
-    title: '진짜일까 가짜일까? (딥페이크)',
-    islandName: '착시의 섬',
-    emoji: '🎭',
-    color: '#ff8fb1',
-    goal: 'AI로 조작된 이미지·영상을 비판적으로 판별한다',
-    playable: false,
-    gameName: '진짜가짜 탐정단',
-    howto: '',
-    howtoIcons: '🔍',
-    chars: { left: 'eti', right: 'eti' },
-    rightName: '',
-    intro: [],
-    mission: '',
-    summary: [],
-    quiz: [],
-    x: 60,
-    y: 42
-  },
-  {
-    id: 5,
-    title: '추천 알고리즘의 비밀',
-    islandName: '소용돌이 섬',
-    emoji: '🌀',
-    color: '#b39dff',
-    goal: '추천 알고리즘의 원리와 필터버블을 이해한다',
-    playable: false,
-    gameName: '추천 소용돌이 탈출',
-    howto: '',
-    howtoIcons: '📺',
-    chars: { left: 'eti', right: 'eti' },
-    rightName: '',
-    intro: [],
-    mission: '',
-    summary: [],
-    quiz: [],
-    x: 75,
-    y: 66
-  },
-  {
-    id: 6,
-    title: 'AI와 저작권',
-    islandName: '창작의 섬',
-    emoji: '🎨',
-    color: '#ffab5e',
-    goal: '생성형 AI 결과물과 다른 사람의 창작물을 존중한다',
-    playable: false,
-    gameName: '작품 주인 찾기',
-    howto: '',
-    howtoIcons: '🖼️',
-    chars: { left: 'eti', right: 'eti' },
-    rightName: '',
-    intro: [],
-    mission: '',
-    summary: [],
-    quiz: [],
-    x: 88,
-    y: 40
-  },
-  {
-    id: 7,
-    title: '챗봇과 바르게 대화해요',
-    islandName: '대화의 섬',
-    emoji: '💬',
-    color: '#6ee7c8',
-    goal: 'AI와 대화할 때도 바른 언어를 사용한다',
-    playable: false,
-    gameName: '챗봇 대화왕',
-    howto: '',
-    howtoIcons: '🗨️',
-    chars: { left: 'eti', right: 'eti' },
-    rightName: '',
-    intro: [],
-    mission: '',
-    summary: [],
-    quiz: [],
-    x: 85,
-    y: 20
-  },
-  {
-    id: 8,
-    title: 'AI에게 다 맡겨도 될까?',
-    islandName: '균형의 섬',
-    emoji: '⚖️',
-    color: '#ffd93d',
-    goal: '스스로 생각하기와 AI 활용의 균형을 찾는다',
-    playable: false,
-    gameName: '숙제 대작전',
-    howto: '',
-    howtoIcons: '📚',
-    chars: { left: 'eti', right: 'eti' },
-    rightName: '',
-    intro: [],
-    mission: '',
-    summary: [],
-    quiz: [],
-    x: 68,
-    y: 18
-  },
-  {
-    id: 9,
-    title: 'AI는 공정할까?',
-    islandName: '저울의 섬',
-    emoji: '🏅',
-    color: '#7cc7ff',
-    goal: 'AI 판단이 불공정할 수 있음을 알고 살펴본다',
-    playable: false,
-    gameName: 'AI 심판 고치기',
-    howto: '',
-    howtoIcons: '⚽',
-    chars: { left: 'eti', right: 'eti' },
-    rightName: '',
-    intro: [],
-    mission: '',
-    summary: [],
-    quiz: [],
-    x: 52,
-    y: 17
-  },
-  {
-    id: 10,
-    title: '책임은 누구에게?',
-    islandName: '갈림길 섬',
-    emoji: '🚗',
-    color: '#ff8fb1',
-    goal: 'AI가 실수했을 때의 책임에 대해 생각한다',
-    playable: false,
-    gameName: '자율주행 법정',
-    howto: '',
-    howtoIcons: '🚦',
-    chars: { left: 'eti', right: 'eti' },
-    rightName: '',
-    intro: [],
-    mission: '',
-    summary: [],
-    quiz: [],
-    x: 35,
-    y: 20
-  },
-  {
-    id: 11,
-    title: 'AI도 거짓말을 해요 (환각)',
-    islandName: '안개의 섬',
-    emoji: '🌫️',
-    color: '#b39dff',
-    goal: 'AI 답변을 그대로 믿지 않고 확인하는 습관을 기른다',
-    playable: false,
-    gameName: '팩트체크 특공대',
-    howto: '',
-    howtoIcons: '✅❌',
-    chars: { left: 'eti', right: 'eti' },
-    rightName: '',
-    intro: [],
-    mission: '',
-    summary: [],
-    quiz: [],
-    x: 18,
-    y: 25
-  },
-  {
-    id: 12,
-    title: 'AI 윤리 수호자 (종합)',
-    islandName: '수호자의 성',
-    emoji: '🏰',
-    color: '#ffd93d',
-    goal: '1~11차시 내용을 종합하여 AI 윤리 수호자가 된다',
-    playable: false,
-    gameName: '최종 보스전',
-    howto: '',
-    howtoIcons: '👑',
-    chars: { left: 'eti', right: 'eti' },
-    rightName: '',
-    intro: [],
-    mission: '',
-    summary: [],
-    quiz: [],
-    x: 8,
-    y: 48
-  }
+  lesson04,
+  lesson05,
+  lesson06,
+  lesson07,
+  lesson08,
+  lesson09,
+  lesson10,
+  lesson11,
+  lesson12
 ];
 
 export function getLesson(id: number): Lesson {
