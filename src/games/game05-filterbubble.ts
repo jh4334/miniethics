@@ -228,7 +228,8 @@ const CSS = `
   padding:13px 22px; border-radius:999px; z-index:45; animation:g05-pop .2s ease; }
 
 /* ---------- 페이즈 C 퀴즈 ---------- */
-.howto-card.g05-qcard { width:880px; }
+.howto-card.g05-qcard { width:880px; max-height:764px; overflow-y:auto; }
+.howto-card.g05-qcard .btn { margin-top:16px; }
 .g05-who { font-size:22px; font-weight:800; color:#6b6488; margin-bottom:8px; }
 .g05-hist { background:#f5f1ff; border-radius:18px; padding:14px 18px; margin-bottom:16px;
   display:flex; flex-direction:column; gap:7px; }
@@ -239,6 +240,7 @@ const CSS = `
   color:#3a3352; background:#fff; border:5px solid #e2daff; border-radius:18px;
   padding:10px 18px; cursor:pointer; }
 .g05-choice:active { transform:translateY(2px); }
+.g05-choice:disabled { cursor:default; opacity:1; color:#3a3352; }
 .g05-choice.g05-ok { background:#dcf7e2; border-color:#51cf66; }
 .g05-choice.g05-ng { background:#ffe2e2; border-color:#ff6b6b; }
 .g05-exp { font-size:22px; line-height:1.5; color:#6b6488; margin-top:14px; }

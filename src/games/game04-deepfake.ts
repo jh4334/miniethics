@@ -536,8 +536,8 @@ const CASES: CaseData[] = [
       },
       {
         label: '마이크와 손',
-        x: 55,
-        y: 63,
+        x: 64,
+        y: 66,
         isClue: true,
         zoom: '🎤',
         text: '마이크가 손가락을 <b>뚫고</b> 지나가고 있어! 진짜 영상이면 불가능하지.',
@@ -554,8 +554,8 @@ const CASES: CaseData[] = [
       },
       {
         label: '넥타이',
-        x: 50,
-        y: 52,
+        x: 38,
+        y: 54,
         isClue: false,
         zoom: '👔',
         text: '넥타이는 평범해.',
@@ -572,8 +572,8 @@ const CASES: CaseData[] = [
       },
       {
         label: '머리카락',
-        x: 50,
-        y: 20,
+        x: 36,
+        y: 17,
         isClue: false,
         zoom: '💇',
         text: '머리 모양은 딱히 이상하지 않아.',
@@ -640,8 +640,8 @@ const CASES: CaseData[] = [
     spots: [
       {
         label: '얼굴 밝기',
-        x: 50,
-        y: 36,
+        x: 41,
+        y: 32,
         isClue: true,
         zoom: '😶',
         text: '몸은 어두운데 <b>얼굴만 환하게 밝아</b>. 다른 사진의 얼굴을 붙인 것 같아!',
@@ -649,8 +649,8 @@ const CASES: CaseData[] = [
       },
       {
         label: '목 경계선',
-        x: 50,
-        y: 47,
+        x: 60,
+        y: 51,
         isClue: true,
         zoom: '➖',
         text: '목에 어긋난 경계선이 보여. <b>얼굴 합성</b>의 대표 단서야!',
