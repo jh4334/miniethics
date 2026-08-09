@@ -3,7 +3,7 @@ import { el, button, starsHtml } from '../ui/components';
 import { LESSONS } from '../data/curriculum';
 import { save } from '../core/save';
 import { audio } from '../core/audio';
-import { asset } from '../assets-manifest';
+import { charImg } from '../assets-manifest';
 
 export function worldmapScene(mgr: SceneManager) {
   return (root: HTMLElement) => {
@@ -80,9 +80,7 @@ export function worldmapScene(mgr: SceneManager) {
 
     // 현재 섬 위의 주인공
     if (save.isUnlocked(current.id)) {
-      const hero = el('img', 'map-hero');
-      hero.src = asset('hero');
-      hero.alt = '주인공';
+      const hero = charImg('hero', 'map-hero', '주인공');
       hero.style.left = `${current.x}%`;
       hero.style.top = `calc(${current.y}% - 52px)`;
       scene.appendChild(hero);

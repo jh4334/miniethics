@@ -4,7 +4,7 @@
 
 import type { MiniGame, GameCtx } from './registry';
 import { el, button, floater } from '../ui/components';
-import { asset } from '../assets-manifest';
+import { charImg } from '../assets-manifest';
 
 interface InfoCard {
   emoji: string;
@@ -76,10 +76,7 @@ export const game03: MiniGame = {
 
     // ---------- 캐릭터 ----------
     const hero = el('div', 'g3-hero');
-    const heroImg = el('img');
-    heroImg.src = asset('hero');
-    heroImg.alt = '주인공';
-    hero.appendChild(heroImg);
+    hero.appendChild(charImg('hero', '', '주인공'));
     const monster = el('div', 'g3-monster', '👾');
     wrap.append(hero, monster);
 

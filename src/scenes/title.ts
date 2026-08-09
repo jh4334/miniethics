@@ -1,6 +1,6 @@
 import type { SceneManager } from '../core/scene';
 import { el, button } from '../ui/components';
-import { asset } from '../assets-manifest';
+import { charImg } from '../assets-manifest';
 import { audio } from '../core/audio';
 import { save } from '../core/save';
 
@@ -33,13 +33,7 @@ export function titleScene(mgr: SceneManager) {
     scene.appendChild(logo);
 
     const chars = el('div', 'title-chars');
-    const hero = el('img');
-    hero.src = asset('hero');
-    hero.alt = '주인공';
-    const eti = el('img');
-    eti.src = asset('eti');
-    eti.alt = '에티';
-    chars.append(hero, eti);
+    chars.append(charImg('hero', '', '주인공'), charImg('eti', '', '에티'));
     scene.appendChild(chars);
 
     const startLabel = save.clearedCount() > 0 ? '이어서 모험하기 ▶' : '모험 시작! ▶';

@@ -4,7 +4,7 @@
 
 import type { MiniGame, GameCtx } from './registry';
 import { el, button } from '../ui/components';
-import { asset } from '../assets-manifest';
+import { charImg } from '../assets-manifest';
 
 interface Food {
   emoji: string;
@@ -63,10 +63,7 @@ export const game02: MiniGame = {
     // ---------- 냠봇 + 밥그릇 ----------
     const bot = el('div', 'g2-bot');
     const speech = el('div', 'g2-speech', '나는 과일 박사 냠봇!');
-    const botImg = el('img');
-    botImg.src = asset('nyambot');
-    botImg.alt = '냠봇';
-    bot.append(speech, botImg);
+    bot.append(speech, charImg('nyambot', '', '냠봇'));
     wrap.appendChild(bot);
 
     const bowl = el('div', 'g2-bowl');

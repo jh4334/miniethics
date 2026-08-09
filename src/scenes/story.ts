@@ -1,7 +1,7 @@
 import type { SceneManager, SceneParams } from '../core/scene';
 import { el, button } from '../ui/components';
 import { getLesson } from '../data/curriculum';
-import { asset } from '../assets-manifest';
+import { charImg } from '../assets-manifest';
 import { audio } from '../core/audio';
 
 export function storyScene(mgr: SceneManager) {
@@ -12,12 +12,8 @@ export function storyScene(mgr: SceneManager) {
 
     // 등장인물
     const floor = el('div', 'story-stagefloor');
-    const leftChar = el('img', 'story-char');
-    leftChar.src = asset(lesson.chars.left);
-    leftChar.alt = '에티';
-    const rightChar = el('img', 'story-char');
-    rightChar.src = asset(lesson.chars.right);
-    rightChar.alt = lesson.rightName;
+    const leftChar = charImg(lesson.chars.left, 'story-char', '에티');
+    const rightChar = charImg(lesson.chars.right, 'story-char', lesson.rightName);
     floor.append(leftChar, rightChar);
     scene.appendChild(floor);
 
