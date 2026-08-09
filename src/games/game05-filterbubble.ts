@@ -767,7 +767,7 @@ export const game05: MiniGame = {
         'g05-who',
         cIdx === 0
           ? '에티 — 이번엔 네가 추천 AI가 되어 볼 차례! 알고리즘이라면 어떤 영상을 보여 줄까?'
-          : `${cIdx + 1}번째 문제 (${cIdx + 1} / ${QUIZ_C.length})`
+          : `🤖 추천 AI 문제 ${cIdx + 1} / ${QUIZ_C.length}`
       );
       const head = el('div', 'g05-who', `📼 ${q.who}의 시청 기록`);
       const hist = el('div', 'g05-hist');
