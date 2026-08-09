@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 가이드 로봇 '에티' (플레이스홀더) - 같은 파일명으로 교체하면 그림이 바뀝니다 -->
+  <g>
+    <!-- 안테나 -->
+    <rect x="248" y="52" width="16" height="52" rx="8" fill="#5a3fd6"/>
+    <circle cx="256" cy="46" r="22" fill="#ffd93d"/>
+    <circle cx="256" cy="46" r="10" fill="#fff" opacity="0.7"/>
+    <!-- 귀 -->
+    <circle cx="106" cy="240" r="34" fill="#6ee7c8"/>
+    <circle cx="406" cy="240" r="34" fill="#6ee7c8"/>
+    <!-- 몸통(둥근 로봇) -->
+    <rect x="116" y="104" width="280" height="270" rx="120" fill="#e8f4ff"/>
+    <rect x="116" y="104" width="280" height="270" rx="120" fill="none" stroke="#7cc7ff" stroke-width="12"/>
+    <!-- 화면 얼굴 -->
+    <rect x="156" y="164" width="200" height="130" rx="56" fill="#3a3352"/>
+    <!-- 눈 (하트 모양 행복한 눈) -->
+    <path d="M206 214 q0 -18 16 -18 q12 0 14 12 q2 -12 14 -12 q16 0 16 18 q0 16 -30 34 q-30 -18 -30 -34 z" fill="#6ee7c8" transform="translate(-32 0)"/>
+    <path d="M206 214 q0 -18 16 -18 q12 0 14 12 q2 -12 14 -12 q16 0 16 18 q0 16 -30 34 q-30 -18 -30 -34 z" fill="#6ee7c8" transform="translate(72 0)"/>
+    <!-- 입 -->
+    <path d="M236 262 q20 14 40 0" stroke="#6ee7c8" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <!-- 볼 -->
+    <circle cx="146" cy="300" r="16" fill="#ff8fb1" opacity="0.7"/>
+    <circle cx="366" cy="300" r="16" fill="#ff8fb1" opacity="0.7"/>
+    <!-- 팔 -->
+    <ellipse cx="96" cy="336" rx="26" ry="40" fill="#7cc7ff"/>
+    <ellipse cx="416" cy="336" rx="26" ry="40" fill="#7cc7ff"/>
+    <!-- 다리(호버 제트) -->
+    <ellipse cx="256" cy="400" rx="70" ry="22" fill="#7cc7ff"/>
+    <path d="M226 420 q10 26 -8 46 M256 424 q6 26 -4 50 M288 420 q-2 28 10 46" stroke="#ffd93d" stroke-width="10" stroke-linecap="round" fill="none"/>
+    <!-- 가슴 마크 -->
+    <path d="M256 322 l7 14 15 2 -11 11 3 15 -14 -7 -14 7 3 -15 -11 -11 15 -2 z" fill="#ffd93d"/>
+  </g>
+</svg>

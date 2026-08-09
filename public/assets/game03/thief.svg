@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 3차시 악당 '정보도둑' (플레이스홀더) - 같은 파일명으로 교체하면 그림이 바뀝니다 -->
+  <g>
+    <!-- 훔친 정보 자루 -->
+    <path d="M368 300 q84 10 84 96 q0 70 -70 70 q-64 0 -70 -62 q-4 -58 20 -86 z" fill="#8d6e63"/>
+    <path d="M366 296 l60 -18 -8 26 z" fill="#6d4c41"/>
+    <text x="412" y="412" font-size="52" text-anchor="middle">📇</text>
+    <!-- 몸통 (보라색 유령 몬스터) -->
+    <path d="M120 260 q0 -140 136 -140 q136 0 136 140 v130 q0 30 -34 18 q-16 -6 -22 8 q-12 24 -40 12 q-20 -8 -40 0 q-28 12 -40 -12 q-6 -14 -22 -8 q-34 12 -34 -18 z" fill="#7e57c2"/>
+    <path d="M120 260 q0 -140 136 -140 q136 0 136 140 v130 q0 30 -34 18 q-16 -6 -22 8 q-12 24 -40 12 q-20 -8 -40 0 q-28 12 -40 -12 q-6 -14 -22 -8 q-34 12 -34 -18 z" fill="none" stroke="#5e35b1" stroke-width="10"/>
+    <!-- 도둑 안대(마스크) -->
+    <path d="M130 208 h252 v66 q0 20 -20 20 h-212 q-20 0 -20 -20 z" fill="#3a3352"/>
+    <!-- 반짝이는 눈 -->
+    <circle cx="204" cy="248" r="24" fill="#ffd93d"/>
+    <circle cx="308" cy="248" r="24" fill="#ffd93d"/>
+    <circle cx="210" cy="242" r="8" fill="#fff"/>
+    <circle cx="314" cy="242" r="8" fill="#fff"/>
+    <!-- 씨익 웃는 입 -->
+    <path d="M196 322 q60 40 120 0 q-8 30 -28 28 q-10 16 -32 8 q-22 8 -32 -8 q-20 2 -28 -28 z" fill="#3a3352"/>
+    <path d="M216 330 l14 16 14 -16 14 16 14 -16 14 16 14 -16" stroke="#fff" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <!-- 팔 -->
+    <path d="M120 300 q-44 10 -52 54 q26 6 46 -12" fill="#7e57c2"/>
+    <path d="M392 290 q30 -6 44 -30" stroke="#7e57c2" stroke-width="34" stroke-linecap="round" fill="none"/>
+  </g>
+</svg>

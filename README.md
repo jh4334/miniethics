@@ -1,1 +1,52 @@
-# miniethics
+# AI 윤리 미니게임 월드 🤖⭐
+
+초등학교 5~6학년을 위한 **인공지능 윤리 12차시** 교육용 미니게임 웹앱(PWA)입니다.
+주인공 요원이 가이드 로봇 '에티'와 함께 AI 월드의 12개 섬을 여행하며
+혼란에 빠진 AI 친구들을 도와 **AI 윤리 수호자**가 되는 스토리 진행형 게임입니다.
+
+- 태블릿 가로모드 기준(안드로이드/iOS 브라우저 모두 지원)
+- 설치 없이 링크로 배포, 홈 화면에 추가하면 전체화면 앱처럼 동작
+- 진행도·별점은 기기(localStorage)에 자동 저장
+
+## 현재 구현 상태
+
+| 차시 | 게임 | 상태 |
+|---|---|---|
+| 1차시 AI 학습 원리 | AI 요리사 키우기 (라벨링) | ✅ |
+| 2차시 데이터 편향 | 편식하는 AI | ✅ |
+| 3차시 개인정보 보호 | 개인정보 지킴이 | ✅ |
+| 4~12차시 | 월드맵에 "준비 중"으로 표시 | 🛠️ |
+
+전체 차시 설계는 [docs/curriculum.md](docs/curriculum.md) 참고.
+
+## 실행 방법
+
+```bash
+npm install
+npm run dev        # 개발 서버 (http://localhost:5173)
+npm run build      # 배포용 빌드 → dist/
+npm run preview    # 빌드 결과 미리보기
+```
+
+같은 와이파이의 태블릿에서 보려면 `npm run dev` 실행 후
+터미널에 표시되는 `Network:` 주소를 태블릿 브라우저에서 열면 됩니다.
+
+## 배포 (GitHub Pages 등)
+
+`npm run build` 후 `dist/` 폴더를 정적 호스팅(GitHub Pages, Netlify 등)에 올리면 끝.
+상대 경로로 빌드되므로 어떤 하위 경로에 올려도 동작합니다.
+
+## 그림 교체
+
+지금 그림은 플레이스홀더입니다. GPT로 만든 귀여운 그림으로
+**같은 파일명 덮어쓰기**만 하면 바로 교체됩니다 → [docs/asset-guide.md](docs/asset-guide.md)
+
+## 새 미니게임 추가하기
+
+1. `src/games/gameXX-이름.ts` 생성 — `MiniGame` 인터페이스(`mount`/`finish`) 구현
+2. `src/games/registry.ts`에 등록
+3. `src/data/curriculum.ts`에서 해당 차시 `playable: true`로 바꾸고 스토리·퀴즈 채우기
+
+## 기술 스택
+
+Vite + TypeScript (프레임워크 없음) · PWA(서비스워커 오프라인 캐시) · WebAudio 합성 효과음
