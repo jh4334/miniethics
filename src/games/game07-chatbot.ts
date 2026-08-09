@@ -275,7 +275,7 @@ const CSS = `
 }
 .g07-bubble.show { opacity: 1; transform: translateY(0); }
 .g07-bubble.sys {
-  align-self: center; max-width: 740px; text-align: center; font-size: 21px;
+  align-self: center; max-width: 740px; text-align: center; font-size: 22px;
   background: rgba(58,51,82,.12); color: var(--ink-soft);
 }
 .g07-bubble.me {

@@ -109,7 +109,7 @@ const CASES: CaseData[] = [
       { x: 52, y: 55, html: '🧍‍♂️', size: 150 },
       { x: 44, y: 58, html: '🖐️', size: 44 },
       { x: 62, y: 78, html: '⚽', size: 54 },
-      { x: 52, y: 86, html: '👟', size: 44 }
+      { x: 50, y: 88, html: '👟', size: 44 }
     ],
     spots: [
       {
@@ -123,7 +123,7 @@ const CASES: CaseData[] = [
       },
       {
         label: '현수막 글자',
-        x: 50,
+        x: 63,
         y: 15,
         isClue: true,
         zoom: '🔤',
@@ -159,8 +159,8 @@ const CASES: CaseData[] = [
       },
       {
         label: '운동화',
-        x: 52,
-        y: 86,
+        x: 50,
+        y: 88,
         isClue: false,
         zoom: '👟',
         text: '운동화는 평범해 보여.',
@@ -313,8 +313,8 @@ const CASES: CaseData[] = [
       },
       {
         label: '상어 그림자',
-        x: 40,
-        y: 76,
+        x: 38,
+        y: 78,
         isClue: true,
         zoom: '🌑',
         text: '해는 오른쪽에 있는데 그림자는 반대쪽이야. <b>빛의 방향이 안 맞아!</b>',
@@ -349,8 +349,8 @@ const CASES: CaseData[] = [
       },
       {
         label: '상어 이빨',
-        x: 45,
-        y: 52,
+        x: 44,
+        y: 51,
         isClue: false,
         zoom: '🦈',
         text: '무섭게 생겼지만 상어 이빨은 원래 이래.',
@@ -536,7 +536,7 @@ const CASES: CaseData[] = [
       },
       {
         label: '마이크와 손',
-        x: 64,
+        x: 61,
         y: 66,
         isClue: true,
         zoom: '🎤',
@@ -545,7 +545,7 @@ const CASES: CaseData[] = [
       },
       {
         label: '자막',
-        x: 50,
+        x: 14,
         y: 88,
         isClue: false,
         zoom: '🔤',
@@ -554,8 +554,8 @@ const CASES: CaseData[] = [
       },
       {
         label: '넥타이',
-        x: 38,
-        y: 54,
+        x: 44,
+        y: 53,
         isClue: false,
         zoom: '👔',
         text: '넥타이는 평범해.',
@@ -572,8 +572,8 @@ const CASES: CaseData[] = [
       },
       {
         label: '머리카락',
-        x: 36,
-        y: 17,
+        x: 41,
+        y: 18,
         isClue: false,
         zoom: '💇',
         text: '머리 모양은 딱히 이상하지 않아.',
@@ -597,51 +597,53 @@ const CASES: CaseData[] = [
       band(70, 30, { background: 'linear-gradient(180deg,#cbb894,#a89272)' }),
       {
         x: 75,
-        y: 28,
-        html: '<span style="font-size:64px">✱</span>',
+        y: 26,
+        html: '<span style="font-size:86px">✱</span>',
         css: {
           width: '150px',
           height: '120px',
           background: 'rgba(180,225,240,0.6)',
           border: '8px solid #8b6f47',
           borderRadius: '6px',
-          color: 'rgba(255,255,255,0.9)'
+          color: '#33485e'
         }
       },
       { x: 20, y: 60, html: '⚽', size: 58 },
       { x: 52, y: 82, html: '👟', size: 48 },
-      { x: 50, y: 45, html: '👧', size: 172 },
+      // 얼굴 중심이 emoji 박스 중심보다 아래에 그려지므로 인물을 위로 올려
+      // 밝은 하이라이트(얼굴)와 목 경계선을 배치할 공간을 만든다.
+      { x: 50, y: 36, html: '👧', size: 172 },
       band(0, 100, { background: 'rgba(15,12,30,0.42)' }),
-      {
-        x: 50,
-        y: 34,
-        html: '',
-        css: {
-          width: '170px',
-          height: '170px',
-          borderRadius: '50%',
-          background:
-            'radial-gradient(circle, rgba(255,255,235,0.7) 0%, rgba(255,255,235,0) 70%)'
-        }
-      },
       {
         x: 50,
         y: 47,
         html: '',
         css: {
-          width: '92px',
+          width: '210px',
+          height: '210px',
+          borderRadius: '50%',
+          background:
+            'radial-gradient(circle, rgba(255,255,235,0.78) 0%, rgba(255,255,235,0.5) 45%, rgba(255,255,235,0) 72%)'
+        }
+      },
+      {
+        x: 50,
+        y: 61,
+        html: '',
+        css: {
+          width: '104px',
           height: '5px',
           background: 'rgba(255,255,255,0.85)',
           transform: 'translate(-50%,-50%) rotate(-7deg)',
-          boxShadow: '0 3px 0 rgba(0,0,0,0.3)'
+          boxShadow: '0 3px 0 rgba(0,0,0,0.35)'
         }
       }
     ],
     spots: [
       {
         label: '얼굴 밝기',
-        x: 41,
-        y: 32,
+        x: 50,
+        y: 44,
         isClue: true,
         zoom: '😶',
         text: '몸은 어두운데 <b>얼굴만 환하게 밝아</b>. 다른 사진의 얼굴을 붙인 것 같아!',
@@ -649,8 +651,8 @@ const CASES: CaseData[] = [
       },
       {
         label: '목 경계선',
-        x: 60,
-        y: 51,
+        x: 50,
+        y: 63,
         isClue: true,
         zoom: '➖',
         text: '목에 어긋난 경계선이 보여. <b>얼굴 합성</b>의 대표 단서야!',
@@ -659,7 +661,7 @@ const CASES: CaseData[] = [
       {
         label: '깨진 유리창',
         x: 75,
-        y: 28,
+        y: 26,
         isClue: false,
         zoom: '🪟',
         text: '유리창이 깨져 있긴 하네…',

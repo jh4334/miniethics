@@ -212,9 +212,9 @@ const CSS = `
 .g06-timer-off { visibility: hidden; }
 
 .g06-left { position:absolute; left:0; top:70px; width:560px; height:730px; }
-.g06-progress { position:absolute; left:56px; top:8px; font-size:24px; font-weight:800;
+.g06-progress { position:absolute; left:56px; top:6px; font-size:24px; font-weight:800;
   background:rgba(255,255,255,.92); padding:6px 20px; border-radius:999px; box-shadow:var(--shadow); }
-.g06-frame-slot { position:absolute; left:56px; top:56px; width:420px; height:326px; }
+.g06-frame-slot { position:absolute; left:56px; top:52px; width:420px; height:326px; }
 .g06-frame { position:absolute; inset:0; border:14px solid #d9a441; border-radius:10px;
   box-shadow:0 8px 0 rgba(58,51,82,.2); overflow:hidden;
   transition: transform .35s ease, opacity .35s ease; }
@@ -224,17 +224,20 @@ const CSS = `
   background:rgba(44,37,71,.5); }
 .g06-motif { position:absolute; transform:translate(-50%,-50%); line-height:1; }
 
-.g06-plaque { position:absolute; left:56px; top:396px; width:420px; min-height:94px;
+/* 이름표 한 줄(예: 🏷️ 참고: 초록 작가 「숲속 나무 친구」)이 줄바꿈 없이 들어가야
+   명패가 아래 그리미 영역(top 512px)을 침범하지 않는다. → 폭 496px 확보 */
+.g06-plaque { position:absolute; left:56px; top:384px; width:496px; min-height:100px;
   background:#fff8e6; border:4px solid #d9a441; border-radius:14px; padding:10px 16px; }
-.g06-plaque-base { font-size:21px; font-weight:800; color:var(--ink); }
-.g06-tag { font-size:21px; font-weight:800; color:#8a5a12; margin-top:7px;
+.g06-plaque-base { font-size:22px; font-weight:800; color:var(--ink); line-height:1.2; }
+.g06-tag { font-size:22px; font-weight:800; color:#8a5a12; margin-top:7px; line-height:1.2;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   animation: g06-slide .35s ease; }
 .g06-tag.g06-gray { color:#8d8aa0; }
 @keyframes g06-slide { from { transform: translateX(-26px); opacity:0 } to { transform:none; opacity:1 } }
 
-.g06-grimy-row { position:absolute; left:16px; top:520px; width:540px; height:200px;
+.g06-grimy-row { position:absolute; left:16px; top:512px; width:540px; height:208px;
   display:flex; align-items:flex-end; gap:8px; }
-.g06-grimy { height:156px; }
+.g06-grimy { height:156px; flex:none; }
 .g06-bubble { flex:1; background:#fff; border:4px solid var(--ink); border-radius:18px;
   padding:12px 16px; font-size:22px; font-weight:700; line-height:1.4; margin-bottom:16px; }
 
@@ -243,14 +246,14 @@ const CSS = `
   background:rgba(255,255,255,.92); padding:6px 20px; border-radius:999px; box-shadow:var(--shadow); }
 .g06-grid { position:absolute; left:14px; top:58px; width:686px;
   display:flex; flex-wrap:wrap; gap:16px; }
-.g06-ocard { font-family:var(--font); width:218px; height:206px; border:none; border-radius:16px;
+.g06-ocard { font-family:var(--font); width:218px; height:218px; border:none; border-radius:16px;
   background:#fffdf5; box-shadow:var(--shadow); padding:8px; cursor:pointer; display:block;
   position:relative; text-align:center; transition: transform .1s ease; }
 .g06-ocard:active { transform: translateY(4px); }
-.g06-mini { position:relative; width:100%; height:110px; border:6px solid #d9a441;
+.g06-mini { position:relative; width:100%; height:108px; border:6px solid #d9a441;
   border-radius:8px; overflow:hidden; }
-.g06-oname { font-size:22px; font-weight:800; color:var(--ink); margin-top:6px; }
-.g06-oartist { font-size:20px; font-weight:700; color:var(--ink-soft); }
+.g06-oname { font-size:22px; font-weight:800; color:var(--ink); margin-top:6px; line-height:1.25; }
+.g06-oartist { font-size:22px; font-weight:700; color:var(--ink-soft); line-height:1.2; }
 .g06-ocard.g06-found { background:#fff6d6; box-shadow:0 0 0 6px var(--yellow), var(--shadow); }
 .g06-ocard.g06-found::after { content:'✔'; position:absolute; right:10px; top:6px;
   font-size:30px; color:var(--green); }
@@ -260,9 +263,9 @@ const CSS = `
 .g06-ocard.g06-reveal { box-shadow:0 0 0 6px #9d97b8, var(--shadow); animation: g06-blink .45s ease 3; }
 @keyframes g06-blink { 0%,100%{ filter:none } 50%{ filter:brightness(1.35) } }
 
-.g06-count { position:absolute; left:14px; top:508px; font-size:24px; font-weight:800;
+.g06-count { position:absolute; left:14px; top:524px; font-size:24px; font-weight:800;
   background:rgba(255,255,255,.92); padding:8px 20px; border-radius:999px; box-shadow:var(--shadow); }
-.g06-hint { position:absolute; left:14px; top:568px; width:686px; font-size:21px;
+.g06-hint { position:absolute; left:14px; top:582px; width:686px; font-size:22px;
   font-weight:700; color:var(--ink-soft); line-height:1.5; }
 
 .g06-ghost { position:absolute; z-index:80; pointer-events:none; border:6px solid #d9a441;
@@ -270,7 +273,7 @@ const CSS = `
 
 .g06-choice-card { width:840px; text-align:left; }
 .g06-choice-head { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
-.g06-choice-head img { height:100px; }
+.g06-choice-head img { height:100px; flex:none; }
 .g06-choice-q { font-size:27px; font-weight:800; line-height:1.35; }
 .g06-note { font-size:22px; font-weight:700; color:#2b8a66; background:#e6faf1;
   border-radius:14px; padding:10px 16px; margin-bottom:12px; }
@@ -293,7 +296,7 @@ const CSS = `
 .g06-expo-frame { position:relative; width:100%; height:180px; border:10px solid #d9a441;
   border-radius:8px; overflow:hidden; }
 .g06-expo-title { font-size:22px; font-weight:800; margin-top:8px; }
-.g06-expo-tag { font-size:21px; font-weight:800; color:#8a5a12; margin-top:4px; }
+.g06-expo-tag { font-size:22px; font-weight:800; color:#8a5a12; margin-top:4px; }
 .g06-expo-speech { position:absolute; left:50%; bottom:40px; transform:translateX(-50%);
   width:820px; text-align:center; background:#fff; border:4px solid var(--ink);
   border-radius:18px; padding:16px 24px; font-size:24px; font-weight:800; z-index:41; }
