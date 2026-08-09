@@ -303,7 +303,7 @@ const CSS = `
   position: absolute; left: 340px; top: 84px; width: 900px; height: 210px;
   transition: left 0.5s ease, top 0.5s ease, transform 0.5s ease;
 }
-.g08-scale.big { left: 190px; top: 176px; transform: scale(1.22); }
+.g08-scale.big { left: 280px; top: 168px; transform: scale(1.22); }
 .g08-beam {
   position: absolute; left: 50%; top: 66px; width: 460px; margin-left: -230px;
   height: 18px; border-radius: 9px; background: var(--ink);
@@ -360,7 +360,7 @@ const CSS = `
   box-shadow: 0 6px 0 rgba(58,51,82,0.25);
 }
 .g08-opt-main { font-size: 28px; }
-.g08-opt-cost { font-size: 20px; opacity: 0.75; }
+.g08-opt-cost { font-size: 22px; opacity: 0.75; }
 .g08-opt.self { background: var(--mint); }
 .g08-opt.together { background: var(--yellow); }
 .g08-opt.delegate { background: var(--sky); }
@@ -453,7 +453,8 @@ export const game08: MiniGame = {
     let timeLeft = TIME_TOTAL;
     let taskIdx = 0;
     let busy = false;
-    let over = false; // finish/quit 중복 호출 가드
+    let over = false; // 페이즈 진행 중단 플래그
+    let exited = false; // finish/quit 중복 호출 가드
     const picks: (Method | null)[] = TASKS.map(() => null);
     let selfCount = 0;
     let togetherCount = 0;
@@ -466,7 +467,15 @@ export const game08: MiniGame = {
 
     // ---------- 상단 바 ----------
     const topbar = el('div', 'game-topbar');
-    const quitBtn = button('🗺️', () => ctx.quit(), 'icon-btn');
+    const quitBtn = button(
+      '🗺️',
+      () => {
+        if (exited) return;
+        exited = true;
+        ctx.quit();
+      },
+      'icon-btn'
+    );
     const nameEl = el('div', 'game-name', '📚 미루의 숙제 대작전');
     const progressEl = el('div', 'game-score', '숙제 1 / 8');
     const timeEl = el('div', 'g08-time');
@@ -607,6 +616,7 @@ export const game08: MiniGame = {
         if (taskIdx >= TASKS.length) {
           startSchool();
         } else if (timeLeft < 1) {
+          busy = true; // 남은 숙제 미제출 연출 중에는 입력 차단
           speech.innerHTML = '으악, 벌써 잘 시간이야!<br>남은 숙제는… 못 했어…';
           updateOptButtons();
           later(startSchool, 1500);
@@ -708,10 +718,12 @@ export const game08: MiniGame = {
         scoreSum += out ? out.points : 0;
         scoreEl.textContent = `점수 ${scoreSum}`;
 
+        let advanced = false;
         const next = button(
           '다음 ▶',
           () => {
-            if (over) return;
+            if (over || advanced) return;
+            advanced = true;
             resultIdx++;
             showResult();
           },
@@ -801,7 +813,15 @@ export const game08: MiniGame = {
           스스로 할 일, AI와 같이 할 일, 맡겨도 되는 일 — 균형이 답이에요!
           <div class="g08-final-line">미루: "${miruLine}"</div>
         </div>`;
-      const doneBtn = button('결과 보기 🏆', () => ctx.finish(score), 'btn big yellow');
+      const doneBtn = button(
+        '결과 보기 🏆',
+        () => {
+          if (exited) return;
+          exited = true;
+          ctx.finish(score);
+        },
+        'btn big yellow'
+      );
       cardEl.appendChild(doneBtn);
       overlay.appendChild(cardEl);
       wrap.appendChild(overlay);

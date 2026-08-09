@@ -228,6 +228,12 @@ const CSS = `
 }
 .g11-judge { display: flex; gap: 20px; }
 .g11-judge .btn { flex: 1; min-height: 88px; font-size: 28px; padding: 14px 20px; }
+
+/* ---- 결과 카드의 마지막 판정 안내 ---- */
+.g11-lastnote {
+  background: var(--cream); border-radius: 18px; padding: 12px 20px;
+  margin-bottom: 14px; font-size: 22px; line-height: 1.5; word-break: keep-all;
+}
 `;
 
 /* ============================================================
@@ -326,7 +332,8 @@ export const game11: MiniGame = {
     function setFog(next: number) {
       const prev = fog;
       fog = Math.max(0, Math.min(6, next));
-      fogEl.style.opacity = String(fog / 6);
+      // 레벨 6에서도 최대 ~0.83으로 캡: 안개 은유는 살리되 라운드 텍스트는 읽을 수 있게
+      fogEl.style.opacity = String(Math.min(fog, 5) / 6);
       wrap.classList.toggle('clear', fog === 0);
       charEl.classList.toggle('hazy', fog >= 5);
       if (fog === 0 && prev > 0) {
@@ -433,6 +440,14 @@ export const game11: MiniGame = {
         botSay('어…? 미안, 사실 나도 확실하지 않았어…');
       }
       updateHud();
+
+      // 하트를 모두 잃으면 8라운드 전이라도 곧바로 결과로 (마지막 사실은 결과 카드에서 안내)
+      if (hearts <= 0) {
+        // 결과 화면으로 넘어가기를 기다리는 동안 액션 버튼을 치워 오조작(소리만 나는 탭)을 막는다
+        bottom.innerHTML = '';
+        later(() => gameOver(r), 1000);
+        return;
+      }
       showStrip();
     }
 
@@ -445,6 +460,11 @@ export const game11: MiniGame = {
       stopTimer();
       inspected += 1;
       const r = ROUNDS[roundIdx];
+
+      // 패널(left/right 36px)이 하단 액션 영역(left/right 20px)보다 좁아 버튼 양옆 16px 띠가
+      // 노출되므로, 패널을 열기 전에 액션 버튼을 치워 '소리만 나는 탭'을 막는다.
+      // (이후 decide() → showStrip()에서 bottom을 다시 채운다)
+      bottom.innerHTML = '';
 
       panel = el('div', 'g11-panel');
       const head = el('div', 'g11-panel-head', '🔍 출처 조사');
@@ -524,7 +544,7 @@ export const game11: MiniGame = {
     }
 
     /* ---------- 결과 ---------- */
-    function gameOver() {
+    function gameOver(lastRound?: Round) {
       if (ended || done) return;
       ended = true;
       stopTimer();
@@ -548,9 +568,13 @@ export const game11: MiniGame = {
 
       const overlay = el('div', 'game-over-overlay');
       const cardEl = el('div', 'card howto-card');
+      const lastNoteHtml = lastRound
+        ? `<div class="g11-lastnote">❌ 마지막 대답은 <b>지어낸 말(환각)</b>이었어요.<br>${lastRound.truthNote}${lastRound.etiNote ? `<br>에티: ${lastRound.etiNote}` : ''}</div>`
+        : '';
       cardEl.innerHTML = `
-        <h2>팩트체크 완료! 🕵️</h2>
+        <h2>${lastRound ? '안개에 갇혔어요… 🌫️' : '팩트체크 완료! 🕵️'}</h2>
         <div class="howto-icons">${fog === 0 ? '☀️🎯' : fog <= 3 ? '🌤️🔍' : '🌫️💦'}</div>
+        ${lastNoteHtml}
         <div class="howto-desc">
           잡아낸 환각: <b>${caught} / ${FAKE_TOTAL}</b><br>
           출처 확인 횟수: <b>${inspected} / ${ROUNDS.length}</b>${allChecked ? ' <b>(꼼꼼 특공대 보너스 +4)</b>' : ''}<br>

@@ -330,6 +330,8 @@ const CSS = `
 
 /* ---- 문항 영역 ---- */
 .g12-quiz { position: absolute; left: 0; right: 0; top: 348px; bottom: 0; z-index: 20; }
+/* 보스 등장 연출 동안에는 빈 문항 카드가 보이지 않도록 숨긴다 */
+.g12-quiz.g12-hidden { display: none; }
 .g12-round-label {
   text-align: center; font-size: 24px; font-weight: 800; color: #fff7e0;
   text-shadow: 0 3px 0 rgba(20, 10, 45, 0.5); margin-bottom: 8px;
@@ -376,15 +378,29 @@ const CSS = `
 .g12-explain.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ---- 에티 응원 토스트 ---- */
+/* 피니셔 응원은 선언 버튼 줄(y 662~746, 그림자 포함) 위에 뜨도록 bottom을 올린다.
+   토스트 자체는 정보 표시용이라 pointer-events: none 으로 탭을 가로채지 않게 한다. */
 .g12-eti-cheer {
-  position: absolute; left: 16px; bottom: 16px; z-index: 65;
+  position: absolute; left: 16px; bottom: 150px; z-index: 65;
+  max-width: 760px;
   background: #fffdf5; border-radius: 18px; padding: 12px 18px;
   box-shadow: 0 6px 0 rgba(20, 10, 45, 0.35);
   font-size: 22px; font-weight: 800; color: #3a3352;
+  pointer-events: none;
   animation: g12-toast 0.3s ease;
+}
+/* 라운드 중(하트 0) 응원은 화면 아래 해설 배너(x 190~1090, y 734~788)와 겹치지 않게
+   좌측 상단(보스 말풍선 아래 / 방패 줄 위)에 띄운다. */
+.g12-eti-cheer.g12-cheer-side {
+  top: 196px; bottom: auto; max-width: 420px;
+  animation: g12-toast-side 0.3s ease;
 }
 @keyframes g12-toast {
   from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes g12-toast-side {
+  from { opacity: 0; transform: translateY(-16px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -492,7 +508,8 @@ export const game12: MiniGame = {
     wrap.appendChild(shieldRow);
 
     /* ---------- 문항 영역 ---------- */
-    const quizEl = el('div', 'g12-quiz');
+    // 등장 연출(약 1.8초) 동안에는 숨겨 둔다. 첫 startRound()에서 표시.
+    const quizEl = el('div', 'g12-quiz g12-hidden');
     const labelEl = el('div', 'g12-round-label', '');
     const questionEl = el('div', 'g12-question', '');
     const choicesEl = el('div', 'g12-choices');
@@ -554,6 +571,7 @@ export const game12: MiniGame = {
       ctx.audio.pop();
 
       // 문항 표시
+      quizEl.classList.remove('g12-hidden');
       labelEl.textContent = `${idx + 1}라운드 · ${r.island} ${r.icon}`;
       questionEl.textContent = r.q;
       explainEl.classList.remove('show');
@@ -615,7 +633,11 @@ export const game12: MiniGame = {
         bossSay('크하하! 그것도 모르느냐!');
         if (hearts === 0 && !cheered) {
           cheered = true;
-          const cheer = el('div', 'g12-eti-cheer', '🤖 에티: 포기하지 마! 남은 카드에 집중하자!');
+          const cheer = el(
+            'div',
+            'g12-eti-cheer g12-cheer-side',
+            '🤖 에티: 포기하지 마! 남은 카드에 집중하자!'
+          );
           wrap.appendChild(cheer);
           later(() => cheer.remove(), 2000);
         }

@@ -262,6 +262,9 @@ const SAY = {
 // ============================================================
 
 const CSS = `
+/* 상단바에서 점수를 오른쪽 끝으로 밀어내는 여백 (타이머 바 대신) */
+.g10-spacer { flex:1; }
+
 .g10-scene { background:
   linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,.15)),
   linear-gradient(180deg,#ffe4ec 0%,#fff2e0 55%,#fffaf0 100%);
@@ -365,14 +368,15 @@ const CSS = `
   background:var(--yellow); border:4px solid #d9b21a; display:flex; align-items:center;
   justify-content:center; transform:translate(-50%,-50%);
   transition:left .34s cubic-bezier(.3,.8,.4,1), top .34s cubic-bezier(.3,.8,.4,1); }
-.g10-fly.slip { animation:g10-slip .9s ease forwards; }
+/* AI 피고 위에서 미끄러지는 흔들림 (끝나면 원래 transform으로 복귀 → 트레이로 되돌아감) */
+.g10-fly.slip { animation:g10-slip .44s ease; }
 @keyframes g10-slip {
   0%   { transform:translate(-50%,-50%) rotate(0deg); }
-  14%  { transform:translate(-52%,-54%) rotate(-14deg); }
-  28%  { transform:translate(-48%,-54%) rotate(14deg); }
-  42%  { transform:translate(-52%,-52%) rotate(-12deg); }
-  56%  { transform:translate(-48%,-48%) rotate(10deg); }
-  100% { transform:translate(-10%,120%) rotate(150deg); opacity:0; }
+  18%  { transform:translate(-60%,-44%) rotate(-18deg); }
+  40%  { transform:translate(-40%,-58%) rotate(18deg); }
+  62%  { transform:translate(-60%,-42%) rotate(-14deg); }
+  82%  { transform:translate(-44%,-54%) rotate(10deg); }
+  100% { transform:translate(-50%,-50%) rotate(0deg); }
 }
 
 /* D: 판결 결과 */
@@ -435,6 +439,18 @@ export const game10: MiniGame = {
       timers.push(window.setTimeout(fn, ms));
     }
 
+    // 단계 A(사건 재생)의 연출 예약 타이머 — 화면이 바뀌면 즉시 취소한다
+    const actorTimers: number[] = [];
+    function laterActor(fn: () => void, ms: number) {
+      const id = window.setTimeout(fn, ms);
+      timers.push(id);
+      actorTimers.push(id);
+    }
+    function clearActorTimers() {
+      actorTimers.forEach((t) => clearTimeout(t));
+      actorTimers.length = 0;
+    }
+
     // ---------- 상단 바 ----------
     const topbar = el('div', 'game-topbar');
     const quitBtn = button(
@@ -447,7 +463,7 @@ export const game10: MiniGame = {
       'icon-btn'
     );
     const nameEl = el('div', 'game-name', '🚗 자율주행 법정');
-    const spacer = el('div', 'spacer');
+    const spacer = el('div', 'g10-spacer');
     const scoreEl = el('div', 'game-score', '사건 1/3 · ⭐0점');
     topbar.append(quitBtn, nameEl, spacer, scoreEl);
     wrap.appendChild(topbar);
@@ -499,6 +515,7 @@ export const game10: MiniGame = {
     // ============================================================
     function phaseA() {
       const c = CASES[caseIdx];
+      clearActorTimers();
       stage.innerHTML = '';
       say(SAY.a);
       updateHud();
@@ -529,7 +546,8 @@ export const game10: MiniGame = {
         play.appendChild(d);
 
         if (a.at !== undefined) {
-          later(() => {
+          laterActor(() => {
+            if (!d.isConnected) return; // 이미 다음 화면으로 넘어갔으면 연출/효과음 생략
             d.style.opacity = '1';
             d.classList.add('g10-in');
             if (a.sound === 'bad') ctx.audio.bad();
@@ -537,7 +555,8 @@ export const game10: MiniGame = {
           }, a.at);
         }
         if (a.tx !== undefined) {
-          later(() => {
+          laterActor(() => {
+            if (!d.isConnected) return;
             d.style.transition = `left ${a.dur ?? 1700}ms linear, opacity .25s ease`;
             d.style.left = `${a.tx}px`;
           }, 60);
@@ -550,6 +569,7 @@ export const game10: MiniGame = {
     // ============================================================
     function phaseB() {
       const c = CASES[caseIdx];
+      clearActorTimers(); // 사건 재생 중 남은 효과음/이동 예약 취소
       stage.innerHTML = '';
       say(SAY.b);
 
@@ -745,8 +765,17 @@ export const game10: MiniGame = {
         judgeBtn.className = remain === 0 && !busy ? 'btn big yellow' : 'btn big g10-off';
       }
 
-      /** 트레이 → 피고 카드로 조각 날리기 */
-      function fly(toEl: HTMLElement, slip: boolean, onLand: () => void) {
+      /**
+       * 트레이 → 피고 카드로 조각 날리기.
+       * slip=true(AI 피고)면 착지 후 미끄러지다가 트레이로 되돌아오고,
+       * 되돌아온 시점에 onReturn이 호출된다.
+       */
+      function fly(
+        toEl: HTMLElement,
+        slip: boolean,
+        onLand: () => void,
+        onReturn?: () => void
+      ) {
         const from = centerOf(tray);
         const to = centerOf(toEl);
         const t = el('div', 'g10-fly', '⚖️');
@@ -760,7 +789,17 @@ export const game10: MiniGame = {
         later(() => {
           if (slip) {
             t.classList.add('slip');
-            later(() => t.remove(), 950);
+            // 흔들림이 끝나면 트레이 쪽으로 되돌아가는 비행
+            later(() => {
+              t.classList.remove('slip');
+              const back = centerOf(tray);
+              t.style.left = `${back.x}px`;
+              t.style.top = `${back.y}px`;
+            }, 450);
+            later(() => {
+              t.remove();
+              onReturn?.();
+            }, 810);
           } else {
             t.remove();
           }
@@ -793,20 +832,33 @@ export const game10: MiniGame = {
         }
         busy = true;
         card.classList.add('hot');
-        fly(slotEls['ai'], true, () => {
-          ctx.audio.bad();
-          shake();
-          say(AI_LINES[aiTryCount % AI_LINES.length]);
-          aiTryCount++;
-          card.classList.remove('hot');
-          floater(wrap, centerOf(card).x, centerOf(card).y + 60, '미끄러졌어! 🚫', false);
-          busy = false;
-          renderTray();
-          if (!tipShown) {
-            tipShown = true;
-            later(showTip, 700);
+        // 비행 중에도 조각 총합이 6개로 보이도록 트레이에서 하나를 잠시 비운다
+        remain--;
+        renderTray();
+        fly(
+          slotEls['ai'],
+          true,
+          () => {
+            ctx.audio.bad();
+            shake();
+            say(AI_LINES[aiTryCount % AI_LINES.length]);
+            aiTryCount++;
+            card.classList.remove('hot');
+            floater(wrap, centerOf(card).x, centerOf(card).y + 60, '미끄러졌어! 🚫', false);
+          },
+          () => {
+            // 미끄러진 조각은 트레이로 되돌아온다
+            remain++;
+            busy = false;
+            renderTray();
+            ctx.audio.pop();
+            floater(wrap, centerOf(tray).x, centerOf(tray).y - 70, '조각이 돌아왔어! ↩️', false);
+            if (!tipShown) {
+              tipShown = true;
+              later(showTip, 400);
+            }
           }
-        });
+        );
       }
 
       c.defendants.forEach(renderSlots);
