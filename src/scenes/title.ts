@@ -1,12 +1,13 @@
 import type { SceneManager } from '../core/scene';
 import { el, button } from '../ui/components';
-import { charImg } from '../assets-manifest';
+import { charImg, sceneBg } from '../assets-manifest';
 import { audio } from '../core/audio';
 import { save } from '../core/save';
 
 export function titleScene(mgr: SceneManager) {
   return (root: HTMLElement) => {
     const scene = el('div', 'scene title-scene');
+    scene.appendChild(sceneBg('./assets/bg/title.png'));
 
     const clouds = el('div', 'title-clouds');
     [

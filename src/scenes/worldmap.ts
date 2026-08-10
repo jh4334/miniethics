@@ -3,11 +3,12 @@ import { el, button, starsHtml } from '../ui/components';
 import { LESSONS } from '../data/curriculum';
 import { save } from '../core/save';
 import { audio } from '../core/audio';
-import { charImg } from '../assets-manifest';
+import { charImg, sceneBg } from '../assets-manifest';
 
 export function worldmapScene(mgr: SceneManager) {
   return (root: HTMLElement) => {
     const scene = el('div', 'scene map-scene');
+    scene.appendChild(sceneBg('./assets/bg/worldmap.png'));
 
     // 바다 물결 장식
     const sea = el('div', 'map-sea');
