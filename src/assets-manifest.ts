@@ -39,3 +39,16 @@ export function charImg(key: string, className = '', alt = ''): HTMLImageElement
   };
   return img;
 }
+
+/**
+ * 씬 배경 이미지: 해당 경로에 PNG가 있으면 씬 맨 뒤에 깔리고,
+ * 없으면 스스로 사라져 기존 CSS 그라데이션 배경이 그대로 보인다.
+ */
+export function sceneBg(path: string): HTMLImageElement {
+  const img = document.createElement('img');
+  img.className = 'scene-bg';
+  img.alt = '';
+  img.src = path;
+  img.onerror = () => img.remove();
+  return img;
+}
