@@ -255,6 +255,9 @@ body.portrait #rotate-overlay {
 .title-scene > .title-clouds {
   position: absolute;
 }
+.title-scene > .title-footer {
+  position: absolute;
+}
 .title-clouds {
   position: absolute;
   inset: 0;
