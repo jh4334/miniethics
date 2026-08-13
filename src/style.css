@@ -3,6 +3,15 @@
    귀여운 파스텔 톤, 태블릿 가로모드(1280x800 논리 해상도) 기준
    ============================================================ */
 
+/* SUIT 폰트 (셀프호스팅, OFL 라이선스 - public/fonts/SUIT-LICENSE.txt) */
+@font-face {
+  font-family: 'SUIT Variable';
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/SUIT-Variable.woff2') format('woff2-variations');
+}
+
 :root {
   --purple: #7c5cff;
   --purple-dark: #5a3fd6;
@@ -19,8 +28,8 @@
   --cream: #fff7e0;
   --shadow: 0 6px 0 rgba(58, 51, 82, 0.15);
   --radius: 22px;
-  --font: 'Tossface', 'BM Jua', 'Jua', 'Baloo 2', 'Comic Sans MS',
-    -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  --font: 'SUIT Variable', 'SUIT', -apple-system, 'Apple SD Gothic Neo',
+    'Noto Sans KR', sans-serif;
 }
 
 * {
