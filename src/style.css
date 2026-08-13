@@ -62,27 +62,27 @@ body {
   overflow: hidden;
 }
 
-/* ---------- 회전 안내 오버레이 ---------- */
-#rotate-overlay {
+/* ---------- 회전 안내 토스트 (세로모드에서도 플레이 가능, 안내만) ---------- */
+#rotate-hint {
   position: fixed;
-  inset: 0;
-  background: #2c2547;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%) translateY(90px);
+  background: rgba(44, 37, 71, 0.92);
   color: #fff;
-  display: none;
-  align-items: center;
-  justify-content: center;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 12px 22px;
+  border-radius: 999px;
   z-index: 999;
-  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  white-space: nowrap;
 }
-body.portrait #rotate-overlay {
-  display: flex;
-}
-.rotate-box .rotate-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
-}
-.rotate-box p {
-  font-size: 22px;
+body.portrait #rotate-hint.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 /* ---------- 씬 공통 ---------- */
@@ -103,6 +103,13 @@ body.portrait #rotate-overlay {
   object-fit: cover;
   z-index: 0;
   pointer-events: none;
+}
+
+/* 스토리 씬: 배경을 살짝 흐리고 채도를 낮춰서
+   또렷한 셀 셰이딩 캐릭터가 앞으로 튀어나와 보이게 (원근감 + 그림체 이질감 완화) */
+.story-scene .scene-bg {
+  filter: blur(3px) saturate(0.82) brightness(1.05);
+  transform: scale(1.03); /* 블러로 생기는 가장자리 번짐 감춤 */
 }
 @keyframes scene-in {
   from {

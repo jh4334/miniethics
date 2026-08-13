@@ -4,7 +4,7 @@
   "description": "초등 5~6학년을 위한 인공지능 윤리 12차시 미니게임",
   "start_url": "./",
   "display": "fullscreen",
-  "orientation": "landscape",
+  "orientation": "any",
   "background_color": "#2c2547",
   "theme_color": "#7c5cff",
   "icons": [

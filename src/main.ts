@@ -10,10 +10,23 @@ import { soonScene } from './scenes/soon';
 const stage = document.getElementById('stage')!;
 
 // ---------- 1280x800 스테이지를 화면에 맞게 스케일 ----------
+// 세로모드에서도 화면에 맞춰 축소되어 그대로 플레이 가능 (가로 권장 안내만 표시)
+let hintTimer: number | null = null;
+
 function fit() {
   const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 800);
   (stage as HTMLElement).style.transform = `scale(${scale})`;
-  document.body.classList.toggle('portrait', window.innerHeight > window.innerWidth);
+  const portrait = window.innerHeight > window.innerWidth;
+  const wasPortrait = document.body.classList.contains('portrait');
+  document.body.classList.toggle('portrait', portrait);
+
+  // 세로모드로 처음/다시 진입할 때만 안내 토스트를 4초간 표시
+  const hint = document.getElementById('rotate-hint');
+  if (hint && portrait && !wasPortrait) {
+    hint.classList.add('show');
+    if (hintTimer) clearTimeout(hintTimer);
+    hintTimer = window.setTimeout(() => hint.classList.remove('show'), 4000);
+  }
 }
 window.addEventListener('resize', fit);
 window.addEventListener('orientationchange', fit);
