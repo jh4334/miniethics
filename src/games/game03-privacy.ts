@@ -66,7 +66,7 @@ export const game03: MiniGame = {
 
     // ---------- 상단 바 ----------
     const topbar = el('div', 'game-topbar');
-    const quit = button('🗺️', () => ctx.quit(), 'icon-btn');
+    const quit = button('🗺️', () => ctx.quit(), 'icon-btn', '그만두기');
     const name = el('div', 'game-name', '🛡️ 개인정보 지킴이');
     const spacer = el('div', 'spacer');
     const heartsEl = el('div', 'hearts', '❤️❤️❤️');

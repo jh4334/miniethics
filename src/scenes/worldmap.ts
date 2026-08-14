@@ -89,7 +89,7 @@ export function worldmapScene(mgr: SceneManager) {
 
     // 상단 HUD
     const hud = el('div', 'hud');
-    const home = button('🏠', () => mgr.go('title'), 'icon-btn');
+    const home = button('🏠', () => mgr.go('title'), 'icon-btn', '타이틀로 가기');
     const title = el('div', 'hud-title', '🗺️ AI 윤리 월드맵');
     const spacer = el('div', 'spacer');
     const total = el(
@@ -100,8 +100,8 @@ export function worldmapScene(mgr: SceneManager) {
     const mute = button(audio.isMuted() ? '🔇' : '🔊', () => {
       audio.setMuted(!audio.isMuted());
       mute.textContent = audio.isMuted() ? '🔇' : '🔊';
-    }, 'icon-btn');
-    const settings = button('⚙️', () => openSettings(), 'icon-btn');
+    }, 'icon-btn', '소리 켜기/끄기');
+    const settings = button('⚙️', () => openSettings(), 'icon-btn', '설정');
     hud.append(home, title, spacer, total, mute, settings);
     scene.appendChild(hud);
 

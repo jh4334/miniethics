@@ -476,8 +476,7 @@ export const game12: MiniGame = {
         done = true;
         ctx.quit();
       },
-      'icon-btn'
-    );
+      'icon-btn', '그만두기');
     const nameEl = el('div', 'game-name', '🏰 최종 보스전: 카오스의 성');
     const timerBar = el('div', 'timer-bar');
     const timerFill = el('div', 'timer-fill');

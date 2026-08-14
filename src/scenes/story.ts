@@ -21,7 +21,7 @@ export function storyScene(mgr: SceneManager) {
 
     // HUD
     const hud = el('div', 'hud');
-    const back = button('🗺️', () => mgr.go('worldmap'), 'icon-btn');
+    const back = button('🗺️', () => mgr.go('worldmap'), 'icon-btn', '월드맵으로 가기');
     hud.append(
       back,
       el('div', 'hud-title', `${lesson.id}차시 · ${lesson.title}`),

@@ -66,7 +66,7 @@ export const game01: MiniGame = {
 
     // ---------- 상단 바 ----------
     const topbar = el('div', 'game-topbar');
-    const quit = button('🗺️', () => ctx.quit(), 'icon-btn');
+    const quit = button('🗺️', () => ctx.quit(), 'icon-btn', '그만두기');
     const name = el('div', 'game-name', '🍳 AI 요리사 키우기');
     const timer = el('div', 'timer-bar');
     const fill = el('div', 'timer-fill');

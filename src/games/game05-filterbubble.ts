@@ -316,7 +316,7 @@ export const game05: MiniGame = {
 
     // ---------- 상단 바 ----------
     const topbar = el('div', 'game-topbar');
-    const quitBtn = button('🗺️', doQuit, 'icon-btn');
+    const quitBtn = button('🗺️', doQuit, 'icon-btn', '그만두기');
     const nameEl = el('div', 'game-name', '🌀 추천 소용돌이 탈출');
     const timerBar = el('div', 'timer-bar');
     const timerFill = el('div', 'timer-fill');

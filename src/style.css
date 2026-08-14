@@ -61,6 +61,26 @@ img {
   user-select: none;
 }
 
+/* 접근성: 시스템의 '동작 줄이기' 설정 존중 (멀미 민감 학생·저사양 기기) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 접근성: 키보드/스위치 사용자용 포커스 표시 */
+.btn:focus-visible,
+.icon-btn:focus-visible,
+.quiz-choice:focus-visible,
+.island:focus-visible {
+  outline: 4px solid var(--purple);
+  outline-offset: 3px;
+}
+
 #viewport {
   position: fixed;
   inset: 0;

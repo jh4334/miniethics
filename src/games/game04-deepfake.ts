@@ -865,7 +865,7 @@ export const game04: MiniGame = {
 
     // ---------- 상단 바 ----------
     const topbar = el('div', 'game-topbar');
-    const quitBtn = button('🗺️', () => safeQuit(), 'icon-btn');
+    const quitBtn = button('🗺️', () => safeQuit(), 'icon-btn', '그만두기');
     const nameEl = el('div', 'game-name', '🔍 진짜가짜 탐정단');
     const timer = el('div', 'timer-bar');
     const fill = el('div', 'timer-fill');

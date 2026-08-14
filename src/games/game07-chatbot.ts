@@ -412,8 +412,7 @@ export const game07: MiniGame = {
         done = true;
         ctx.quit();
       },
-      'icon-btn'
-    );
+      'icon-btn', '그만두기');
     const nameEl = el('div', 'game-name', '💬 챗봇 마음 충전소');
     const moodBar = el('div', 'timer-bar');
     const moodFill = el('div', 'timer-fill g07-mood');

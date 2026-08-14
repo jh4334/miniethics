@@ -300,8 +300,7 @@ export const game09: MiniGame = {
         exited = true;
         ctx.quit();
       },
-      'icon-btn'
-    );
+      'icon-btn', '그만두기');
     const nameEl = el('div', 'game-name', '🏅 AI 심판 고치기');
     const timerBar = el('div', 'timer-bar');
     const fill = el('div', 'timer-fill');

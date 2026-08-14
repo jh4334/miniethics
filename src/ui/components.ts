@@ -14,14 +14,16 @@ export function el<K extends keyof HTMLElementTagNameMap>(
   return e;
 }
 
-/** 클릭 사운드가 포함된 버튼 */
+/** 클릭 사운드가 포함된 버튼. ariaLabel은 이모지 전용 버튼의 스크린리더 안내용 */
 export function button(
   label: string,
   onClick: () => void,
-  className = 'btn'
+  className = 'btn',
+  ariaLabel?: string
 ): HTMLButtonElement {
   const b = el('button', className);
   b.innerHTML = label;
+  if (ariaLabel) b.setAttribute('aria-label', ariaLabel);
   b.addEventListener('click', () => {
     audio.click();
     onClick();
