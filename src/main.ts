@@ -40,6 +40,33 @@ mgr.register('story', storyScene(mgr));
 mgr.register('game', gameScene(mgr));
 mgr.register('result', resultScene(mgr));
 mgr.register('soon', soonScene(mgr));
+// ---------- 뒤로가기: 앱 이탈 대신 상위 화면으로 ----------
+// 태블릿/폰의 뒤로가기(브라우저 back)가 앱을 종료시키지 않고
+// 게임→월드맵→타이틀 순서로 한 단계씩 올라가게 한다
+import type { SceneId } from './core/scene';
+const PARENT: Record<SceneId, SceneId | null> = {
+  title: null,
+  worldmap: 'title',
+  story: 'worldmap',
+  game: 'worldmap',
+  result: 'worldmap',
+  soon: 'worldmap'
+};
+let popNav = false;
+mgr.onNavigate = (id) => {
+  if (!popNav && id !== 'title') history.pushState({ scene: id }, '');
+};
+window.addEventListener('popstate', () => {
+  const parent = mgr.current ? PARENT[mgr.current] : null;
+  if (!parent) return; // 타이틀에서는 브라우저 기본 동작(이탈) 허용
+  popNav = true;
+  try {
+    mgr.go(parent);
+  } finally {
+    popNav = false;
+  }
+});
+
 mgr.go('title');
 
 // ---------- 전역 에러 복구 ----------
