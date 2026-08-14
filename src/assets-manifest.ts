@@ -26,16 +26,21 @@ const BASE = {
 
 export type AssetKey = keyof typeof BASE;
 
-/** 캐릭터 이미지 엘리먼트 생성: PNG 우선, 없으면 SVG 플레이스홀더로 폴백 */
+/** 캐릭터 이미지 엘리먼트 생성: WebP → PNG → SVG 순서로 폴백 */
 export function charImg(key: string, className = '', alt = ''): HTMLImageElement {
   const img = document.createElement('img');
   if (className) img.className = className;
   img.alt = alt;
   const base = BASE[key as AssetKey] ?? BASE.eti;
-  img.src = `${base}.png`;
+  img.src = `${base}.webp`;
   img.onerror = () => {
-    img.onerror = null;
-    img.src = `${base}.svg`;
+    if (img.src.endsWith('.webp')) {
+      img.src = `${base}.png`;
+    } else if (img.src.endsWith('.png')) {
+      img.src = `${base}.svg`;
+    } else {
+      img.onerror = null;
+    }
   };
   return img;
 }
