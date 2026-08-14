@@ -71,6 +71,39 @@ body {
   overflow: hidden;
 }
 
+/* ---------- 전역 에러 복구 / 이탈 확인 오버레이 ---------- */
+.error-recovery,
+.quit-confirm {
+  position: absolute;
+  inset: 0;
+  background: rgba(44, 37, 71, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+}
+.error-recovery .error-card,
+.quit-confirm .quit-card {
+  width: 640px;
+  text-align: center;
+}
+.error-recovery h2,
+.quit-confirm h2 {
+  font-size: 36px;
+  margin: 8px 0;
+}
+.error-recovery p,
+.quit-confirm p {
+  font-size: 22px;
+  color: var(--ink-soft);
+  margin-bottom: 18px;
+}
+.quit-confirm .quit-btns {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
 /* ---------- 회전 안내 토스트 (세로모드에서도 플레이 가능, 안내만) ---------- */
 #rotate-hint {
   position: fixed;

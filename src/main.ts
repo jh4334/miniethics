@@ -42,6 +42,38 @@ mgr.register('result', resultScene(mgr));
 mgr.register('soon', soonScene(mgr));
 mgr.go('title');
 
+// ---------- 전역 에러 복구 ----------
+// 게임 도중 예기치 못한 오류가 나도 멈추지 않고 월드맵으로 돌아갈 수 있게 한다
+let errorShown = false;
+function showErrorRecovery() {
+  if (errorShown) return;
+  errorShown = true;
+  const overlay = document.createElement('div');
+  overlay.className = 'error-recovery';
+  overlay.innerHTML = `
+    <div class="card error-card">
+      <div style="font-size:64px">😵</div>
+      <h2>앗, 문제가 생겼어요!</h2>
+      <p>걱정 마세요. 지금까지의 별과 진행은 안전하게 저장되어 있어요.</p>
+    </div>`;
+  const btn = document.createElement('button');
+  btn.className = 'btn big yellow';
+  btn.textContent = '🗺️ 월드맵으로 돌아가기';
+  btn.addEventListener('click', () => {
+    errorShown = false;
+    overlay.remove();
+    try {
+      mgr.go('worldmap');
+    } catch {
+      location.reload();
+    }
+  });
+  overlay.querySelector('.error-card')!.appendChild(btn);
+  (stage as HTMLElement).appendChild(overlay);
+}
+window.addEventListener('error', showErrorRecovery);
+window.addEventListener('unhandledrejection', showErrorRecovery);
+
 // ---------- PWA 서비스워커 ----------
 if ('serviceWorker' in navigator && !location.hostname.includes('localhost')) {
   window.addEventListener('load', () => {

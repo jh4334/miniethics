@@ -16,11 +16,37 @@ export interface SaveData {
 function load(): SaveData {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return JSON.parse(raw) as SaveData;
+    if (raw) return sanitize(JSON.parse(raw));
   } catch {
     /* 손상된 저장 데이터는 무시하고 새로 시작 */
   }
   return { records: {} };
+}
+
+/** 외부 저장소에서 온 데이터를 신뢰하지 않고 형태·범위를 검증한다 */
+function sanitize(data: unknown): SaveData {
+  const out: SaveData = { records: {} };
+  if (!data || typeof data !== 'object') return out;
+  const records = (data as { records?: unknown }).records;
+  if (!records || typeof records !== 'object') return out;
+  for (const [k, v] of Object.entries(records as Record<string, unknown>)) {
+    const id = Number(k);
+    if (!Number.isInteger(id) || id < 1 || id > 12) continue;
+    if (!v || typeof v !== 'object') continue;
+    const r = v as Partial<LessonRecord>;
+    out.records[id] = {
+      stars: clampInt(r.stars, 0, 3),
+      bestScore: clampInt(r.bestScore, 0, 100),
+      quizBest: clampInt(r.quizBest, 0, 3),
+      cleared: r.cleared === true
+    };
+  }
+  return out;
+}
+
+function clampInt(v: unknown, min: number, max: number): number {
+  const n = typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : min;
+  return Math.min(max, Math.max(min, n));
 }
 
 let data: SaveData = load();
