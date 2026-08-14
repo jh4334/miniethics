@@ -30,6 +30,12 @@ for (let id = 1; id <= 12; id++) {
     await page.waitForTimeout(500);
     await page.getByText('이어서 모험하기').click();
     await page.waitForTimeout(500);
+    // 전체 클리어 시드라 완주 임명장 모달이 뜨면 닫는다
+    const cert = page.getByRole('button', { name: /멋지게 실천할게요/ });
+    if (await cert.count()) {
+      await cert.click();
+      await page.waitForTimeout(300);
+    }
     await page.locator('.island').nth(id - 1).click();
     await page.waitForTimeout(600);
     await page.getByText('건너뛰기').click({ timeout: 5000 });

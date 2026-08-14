@@ -92,10 +92,11 @@ export function worldmapScene(mgr: SceneManager) {
     const home = button('🏠', () => mgr.go('title'), 'icon-btn', '타이틀로 가기');
     const title = el('div', 'hud-title', '🗺️ AI 윤리 월드맵');
     const spacer = el('div', 'spacer');
+    const allCleared = save.clearedCount() === LESSONS.length;
     const total = el(
       'div',
       'map-total',
-      `⭐ ${save.totalStars()} / ${LESSONS.length * 3} &nbsp;·&nbsp; 🏝️ ${save.clearedCount()} / ${LESSONS.length}`
+      `${allCleared ? '👑 ' : ''}⭐ ${save.totalStars()} / ${LESSONS.length * 3} &nbsp;·&nbsp; 🏝️ ${save.clearedCount()} / ${LESSONS.length}`
     );
     const mute = button(audio.isMuted() ? '🔇' : '🔊', () => {
       audio.setMuted(!audio.isMuted());
@@ -129,6 +130,39 @@ export function worldmapScene(mgr: SceneManager) {
       card.appendChild(btns);
       overlay.appendChild(card);
       scene.appendChild(overlay);
+    }
+
+    // ---------- 전체 완주 축하: AI 윤리 수호자 임명장 (최초 1회) ----------
+    const GUARDIAN_KEY = 'miniethics-guardian-shown';
+    let guardianShown = false;
+    try {
+      guardianShown = localStorage.getItem(GUARDIAN_KEY) === '1';
+    } catch {
+      /* 저장 불가 시 매번 표시하지 않도록 아래에서 세션 내 처리 */
+    }
+    if (allCleared && !guardianShown) {
+      const overlay = el('div', 'quit-confirm');
+      const card = el('div', 'card quit-card guardian-card');
+      card.innerHTML = `
+        <div style="font-size:72px">🏅</div>
+        <h2>AI 윤리 수호자 임명장</h2>
+        <p>12개의 섬을 모두 지켜 냈어요!<br>
+        ⭐ ${save.totalStars()}개의 별과 함께, 당신을<br>
+        <b>AI 윤리 수호자</b>로 임명합니다.<br><br>
+        배운 것을 생활 속에서 실천하는 것,<br>그것이 진짜 수호자의 힘이에요! 💪`;
+      const ok = button('멋지게 실천할게요! 🙌', () => {
+        try {
+          localStorage.setItem(GUARDIAN_KEY, '1');
+        } catch {
+          /* 무시 */
+        }
+        overlay.remove();
+        audio.fanfare();
+      }, 'btn big yellow');
+      card.appendChild(ok);
+      overlay.appendChild(card);
+      scene.appendChild(overlay);
+      audio.fanfare();
     }
 
     root.appendChild(scene);
