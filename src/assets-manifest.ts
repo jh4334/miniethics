@@ -41,14 +41,21 @@ export function charImg(key: string, className = '', alt = ''): HTMLImageElement
 }
 
 /**
- * 씬 배경 이미지: 해당 경로에 PNG가 있으면 씬 맨 뒤에 깔리고,
- * 없으면 스스로 사라져 기존 CSS 그라데이션 배경이 그대로 보인다.
+ * 씬 배경 이미지: 용량이 작은 WebP를 먼저 시도하고, 없으면 PNG,
+ * 둘 다 없으면 스스로 사라져 기존 CSS 그라데이션 배경이 그대로 보인다.
  */
-export function sceneBg(path: string): HTMLImageElement {
+export function sceneBg(pngPath: string): HTMLImageElement {
   const img = document.createElement('img');
   img.className = 'scene-bg';
   img.alt = '';
-  img.src = path;
-  img.onerror = () => img.remove();
+  const webpPath = pngPath.replace(/\.png$/, '.webp');
+  img.src = webpPath;
+  img.onerror = () => {
+    if (img.src.endsWith('.webp')) {
+      img.src = pngPath; // WebP가 없으면 PNG로 폴백
+    } else {
+      img.remove();
+    }
+  };
   return img;
 }
