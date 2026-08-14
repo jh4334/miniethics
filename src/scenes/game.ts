@@ -38,9 +38,26 @@ export function gameScene(mgr: SceneManager) {
           mgr.go('result', { lessonId: lesson.id, score: Math.round(score) });
         },
         quit() {
-          if (done) return;
-          done = true;
-          mgr.go('worldmap');
+          // 실수로 이탈 버튼을 눌러 진행을 날리지 않도록 확인을 거친다
+          if (done || scene.querySelector('.quit-confirm')) return;
+          const confirm = el('div', 'quit-confirm');
+          const card = el('div', 'card quit-card');
+          card.innerHTML = `
+            <div style="font-size:56px">🤔</div>
+            <h2>정말 그만둘까?</h2>
+            <p>지금 하던 게임 내용은 사라져요.<br>(지금까지 모은 별은 안전해요!)</p>`;
+          const btns = el('div', 'quit-btns');
+          btns.append(
+            button('계속 할래! 💪', () => confirm.remove(), 'btn big mint'),
+            button('그만둘래', () => {
+              if (done) return;
+              done = true;
+              mgr.go('worldmap');
+            }, 'btn ghost')
+          );
+          card.appendChild(btns);
+          confirm.appendChild(card);
+          scene.appendChild(confirm);
         }
       });
     }, 'btn big yellow');

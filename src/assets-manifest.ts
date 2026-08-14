@@ -26,29 +26,41 @@ const BASE = {
 
 export type AssetKey = keyof typeof BASE;
 
-/** 캐릭터 이미지 엘리먼트 생성: PNG 우선, 없으면 SVG 플레이스홀더로 폴백 */
+/** 캐릭터 이미지 엘리먼트 생성: WebP → PNG → SVG 순서로 폴백 */
 export function charImg(key: string, className = '', alt = ''): HTMLImageElement {
   const img = document.createElement('img');
   if (className) img.className = className;
   img.alt = alt;
   const base = BASE[key as AssetKey] ?? BASE.eti;
-  img.src = `${base}.png`;
+  img.src = `${base}.webp`;
   img.onerror = () => {
-    img.onerror = null;
-    img.src = `${base}.svg`;
+    if (img.src.endsWith('.webp')) {
+      img.src = `${base}.png`;
+    } else if (img.src.endsWith('.png')) {
+      img.src = `${base}.svg`;
+    } else {
+      img.onerror = null;
+    }
   };
   return img;
 }
 
 /**
- * 씬 배경 이미지: 해당 경로에 PNG가 있으면 씬 맨 뒤에 깔리고,
- * 없으면 스스로 사라져 기존 CSS 그라데이션 배경이 그대로 보인다.
+ * 씬 배경 이미지: 용량이 작은 WebP를 먼저 시도하고, 없으면 PNG,
+ * 둘 다 없으면 스스로 사라져 기존 CSS 그라데이션 배경이 그대로 보인다.
  */
-export function sceneBg(path: string): HTMLImageElement {
+export function sceneBg(pngPath: string): HTMLImageElement {
   const img = document.createElement('img');
   img.className = 'scene-bg';
   img.alt = '';
-  img.src = path;
-  img.onerror = () => img.remove();
+  const webpPath = pngPath.replace(/\.png$/, '.webp');
+  img.src = webpPath;
+  img.onerror = () => {
+    if (img.src.endsWith('.webp')) {
+      img.src = pngPath; // WebP가 없으면 PNG로 폴백
+    } else {
+      img.remove();
+    }
+  };
   return img;
 }

@@ -89,20 +89,81 @@ export function worldmapScene(mgr: SceneManager) {
 
     // 상단 HUD
     const hud = el('div', 'hud');
-    const home = button('🏠', () => mgr.go('title'), 'icon-btn');
+    const home = button('🏠', () => mgr.go('title'), 'icon-btn', '타이틀로 가기');
     const title = el('div', 'hud-title', '🗺️ AI 윤리 월드맵');
     const spacer = el('div', 'spacer');
+    const allCleared = save.clearedCount() === LESSONS.length;
     const total = el(
       'div',
       'map-total',
-      `⭐ ${save.totalStars()} / ${LESSONS.length * 3} &nbsp;·&nbsp; 🏝️ ${save.clearedCount()} / ${LESSONS.length}`
+      `${allCleared ? '👑 ' : ''}⭐ ${save.totalStars()} / ${LESSONS.length * 3} &nbsp;·&nbsp; 🏝️ ${save.clearedCount()} / ${LESSONS.length}`
     );
     const mute = button(audio.isMuted() ? '🔇' : '🔊', () => {
       audio.setMuted(!audio.isMuted());
       mute.textContent = audio.isMuted() ? '🔇' : '🔊';
-    }, 'icon-btn');
-    hud.append(home, title, spacer, total, mute);
+    }, 'icon-btn', '소리 켜기/끄기');
+    const settings = button('⚙️', () => openSettings(), 'icon-btn', '설정');
+    hud.append(home, title, spacer, total, mute, settings);
     scene.appendChild(hud);
+
+    // ---------- 설정 (진행 초기화 - 공용 태블릿에서 학급 교체 시 사용) ----------
+    function openSettings() {
+      const overlay = el('div', 'quit-confirm');
+      const card = el('div', 'card quit-card');
+      card.innerHTML = `
+        <div style="font-size:52px">⚙️</div>
+        <h2>설정</h2>
+        <p>진행을 처음부터 다시 시작할 수 있어요.<br>
+        (다음 친구가 이 태블릿을 쓸 때 선생님이 사용해요)</p>`;
+      const btns = el('div', 'quit-btns');
+      const reset = button('🗑️ 처음부터 다시 시작', () => {
+        // 실수 방지 2단계 확인
+        reset.remove();
+        const really = button(`정말 초기화 (⭐ ${save.totalStars()}개 삭제)`, () => {
+          save.reset();
+          mgr.go('title');
+        }, 'btn pink');
+        btns.prepend(really);
+      }, 'btn ghost');
+      const close = button('닫기', () => overlay.remove(), 'btn mint');
+      btns.append(reset, close);
+      card.appendChild(btns);
+      overlay.appendChild(card);
+      scene.appendChild(overlay);
+    }
+
+    // ---------- 전체 완주 축하: AI 윤리 수호자 임명장 (최초 1회) ----------
+    const GUARDIAN_KEY = 'miniethics-guardian-shown';
+    let guardianShown = false;
+    try {
+      guardianShown = localStorage.getItem(GUARDIAN_KEY) === '1';
+    } catch {
+      /* 저장 불가 시 매번 표시하지 않도록 아래에서 세션 내 처리 */
+    }
+    if (allCleared && !guardianShown) {
+      const overlay = el('div', 'quit-confirm');
+      const card = el('div', 'card quit-card guardian-card');
+      card.innerHTML = `
+        <div style="font-size:72px">🏅</div>
+        <h2>AI 윤리 수호자 임명장</h2>
+        <p>12개의 섬을 모두 지켜 냈어요!<br>
+        ⭐ ${save.totalStars()}개의 별과 함께, 당신을<br>
+        <b>AI 윤리 수호자</b>로 임명합니다.<br><br>
+        배운 것을 생활 속에서 실천하는 것,<br>그것이 진짜 수호자의 힘이에요! 💪`;
+      const ok = button('멋지게 실천할게요! 🙌', () => {
+        try {
+          localStorage.setItem(GUARDIAN_KEY, '1');
+        } catch {
+          /* 무시 */
+        }
+        overlay.remove();
+        audio.fanfare();
+      }, 'btn big yellow');
+      card.appendChild(ok);
+      overlay.appendChild(card);
+      scene.appendChild(overlay);
+      audio.fanfare();
+    }
 
     root.appendChild(scene);
   };

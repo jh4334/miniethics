@@ -474,8 +474,7 @@ export const game08: MiniGame = {
         exited = true;
         ctx.quit();
       },
-      'icon-btn'
-    );
+      'icon-btn', '그만두기');
     const nameEl = el('div', 'game-name', '📚 미루의 숙제 대작전');
     const progressEl = el('div', 'game-score', '숙제 1 / 8');
     const timeEl = el('div', 'g08-time');

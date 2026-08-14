@@ -98,7 +98,7 @@ export function resultScene(mgr: SceneManager) {
       const btns = el('div', 'result-btns');
       btns.append(
         button('🗺️ 월드맵으로', () => mgr.go('worldmap'), 'btn mint'),
-        button('🔄 다시 도전', () => mgr.go('story', { lessonId: lesson.id }), 'btn ghost')
+        button('🔄 다시 도전', () => mgr.go('game', { lessonId: lesson.id }), 'btn ghost')
       );
       card.appendChild(btns);
       scene.appendChild(card);

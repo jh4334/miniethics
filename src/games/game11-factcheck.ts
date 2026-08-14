@@ -279,8 +279,7 @@ export const game11: MiniGame = {
         done = true;
         ctx.quit();
       },
-      'icon-btn'
-    );
+      'icon-btn', '그만두기');
     const nameEl = el('div', 'game-name', '🌫️ 팩트체크 특공대');
     const timerBar = el('div', 'timer-bar');
     const timerFill = el('div', 'timer-fill');

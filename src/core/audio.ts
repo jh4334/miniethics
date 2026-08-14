@@ -1,7 +1,14 @@
 // WebAudio 합성 효과음 (에셋 파일 없이 동작, 추후 mp3 교체 가능)
 
 let ctx: AudioContext | null = null;
-let muted = false;
+const MUTE_KEY = 'miniethics-muted';
+let muted = (() => {
+  try {
+    return localStorage.getItem(MUTE_KEY) === '1';
+  } catch {
+    return false;
+  }
+})();
 
 function ac(): AudioContext | null {
   if (typeof AudioContext === 'undefined') return null;
@@ -37,6 +44,11 @@ export const audio = {
   },
   setMuted(m: boolean) {
     muted = m;
+    try {
+      localStorage.setItem(MUTE_KEY, m ? '1' : '0');
+    } catch {
+      /* 저장 실패 시 세션 내에서만 유지 */
+    }
   },
   isMuted() {
     return muted;

@@ -50,6 +50,35 @@ body {
   font-family: var(--font);
   color: var(--ink);
   touch-action: manipulation;
+  /* 당겨서 새로고침·경계 바운스로 게임이 리로드/흔들리는 것 방지 */
+  overscroll-behavior: none;
+}
+
+/* 이미지 길게 누르기 저장 메뉴·드래그 고스트 방지 (게임 조작 방해 차단) */
+img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* 접근성: 시스템의 '동작 줄이기' 설정 존중 (멀미 민감 학생·저사양 기기) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 접근성: 키보드/스위치 사용자용 포커스 표시 */
+.btn:focus-visible,
+.icon-btn:focus-visible,
+.quiz-choice:focus-visible,
+.island:focus-visible {
+  outline: 4px solid var(--purple);
+  outline-offset: 3px;
 }
 
 #viewport {
@@ -69,6 +98,39 @@ body {
   background: linear-gradient(180deg, #b8e3ff 0%, #e6f6ff 60%, #fff9e8 100%);
   border-radius: 0;
   overflow: hidden;
+}
+
+/* ---------- 전역 에러 복구 / 이탈 확인 오버레이 ---------- */
+.error-recovery,
+.quit-confirm {
+  position: absolute;
+  inset: 0;
+  background: rgba(44, 37, 71, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+}
+.error-recovery .error-card,
+.quit-confirm .quit-card {
+  width: 640px;
+  text-align: center;
+}
+.error-recovery h2,
+.quit-confirm h2 {
+  font-size: 36px;
+  margin: 8px 0;
+}
+.error-recovery p,
+.quit-confirm p {
+  font-size: 22px;
+  color: var(--ink-soft);
+  margin-bottom: 18px;
+}
+.quit-confirm .quit-btns {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
 }
 
 /* ---------- 회전 안내 토스트 (세로모드에서도 플레이 가능, 안내만) ---------- */

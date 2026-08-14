@@ -460,8 +460,7 @@ export const game10: MiniGame = {
         exited = true;
         ctx.quit();
       },
-      'icon-btn'
-    );
+      'icon-btn', '그만두기');
     const nameEl = el('div', 'game-name', '🚗 자율주행 법정');
     const spacer = el('div', 'g10-spacer');
     const scoreEl = el('div', 'game-score', '사건 1/3 · ⭐0점');

@@ -9,6 +9,10 @@ export type SceneFactory = (root: HTMLElement, params: SceneParams) => void | ((
 export class SceneManager {
   private scenes = new Map<SceneId, SceneFactory>();
   private cleanup: void | (() => void) = undefined;
+  /** 현재 표시 중인 씬 (뒤로가기 처리 등에 사용) */
+  current: SceneId | null = null;
+  /** 씬 전환 직후 호출되는 훅 */
+  onNavigate?: (id: SceneId) => void;
 
   constructor(private root: HTMLElement) {}
 
@@ -23,5 +27,7 @@ export class SceneManager {
     this.cleanup = undefined;
     this.root.innerHTML = '';
     this.cleanup = factory(this.root, params);
+    this.current = id;
+    this.onNavigate?.(id);
   }
 }

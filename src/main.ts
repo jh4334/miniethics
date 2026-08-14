@@ -40,7 +40,66 @@ mgr.register('story', storyScene(mgr));
 mgr.register('game', gameScene(mgr));
 mgr.register('result', resultScene(mgr));
 mgr.register('soon', soonScene(mgr));
+// ---------- 뒤로가기: 앱 이탈 대신 상위 화면으로 ----------
+// 태블릿/폰의 뒤로가기(브라우저 back)가 앱을 종료시키지 않고
+// 게임→월드맵→타이틀 순서로 한 단계씩 올라가게 한다
+import type { SceneId } from './core/scene';
+const PARENT: Record<SceneId, SceneId | null> = {
+  title: null,
+  worldmap: 'title',
+  story: 'worldmap',
+  game: 'worldmap',
+  result: 'worldmap',
+  soon: 'worldmap'
+};
+let popNav = false;
+mgr.onNavigate = (id) => {
+  if (!popNav && id !== 'title') history.pushState({ scene: id }, '');
+};
+window.addEventListener('popstate', () => {
+  const parent = mgr.current ? PARENT[mgr.current] : null;
+  if (!parent) return; // 타이틀에서는 브라우저 기본 동작(이탈) 허용
+  popNav = true;
+  try {
+    mgr.go(parent);
+  } finally {
+    popNav = false;
+  }
+});
+
 mgr.go('title');
+
+// ---------- 전역 에러 복구 ----------
+// 게임 도중 예기치 못한 오류가 나도 멈추지 않고 월드맵으로 돌아갈 수 있게 한다
+let errorShown = false;
+function showErrorRecovery() {
+  if (errorShown) return;
+  errorShown = true;
+  const overlay = document.createElement('div');
+  overlay.className = 'error-recovery';
+  overlay.innerHTML = `
+    <div class="card error-card">
+      <div style="font-size:64px">😵</div>
+      <h2>앗, 문제가 생겼어요!</h2>
+      <p>걱정 마세요. 지금까지의 별과 진행은 안전하게 저장되어 있어요.</p>
+    </div>`;
+  const btn = document.createElement('button');
+  btn.className = 'btn big yellow';
+  btn.textContent = '🗺️ 월드맵으로 돌아가기';
+  btn.addEventListener('click', () => {
+    errorShown = false;
+    overlay.remove();
+    try {
+      mgr.go('worldmap');
+    } catch {
+      location.reload();
+    }
+  });
+  overlay.querySelector('.error-card')!.appendChild(btn);
+  (stage as HTMLElement).appendChild(overlay);
+}
+window.addEventListener('error', showErrorRecovery);
+window.addEventListener('unhandledrejection', showErrorRecovery);
 
 // ---------- PWA 서비스워커 ----------
 if ('serviceWorker' in navigator && !location.hostname.includes('localhost')) {
