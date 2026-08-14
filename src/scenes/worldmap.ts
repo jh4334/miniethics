@@ -101,8 +101,35 @@ export function worldmapScene(mgr: SceneManager) {
       audio.setMuted(!audio.isMuted());
       mute.textContent = audio.isMuted() ? '🔇' : '🔊';
     }, 'icon-btn');
-    hud.append(home, title, spacer, total, mute);
+    const settings = button('⚙️', () => openSettings(), 'icon-btn');
+    hud.append(home, title, spacer, total, mute, settings);
     scene.appendChild(hud);
+
+    // ---------- 설정 (진행 초기화 - 공용 태블릿에서 학급 교체 시 사용) ----------
+    function openSettings() {
+      const overlay = el('div', 'quit-confirm');
+      const card = el('div', 'card quit-card');
+      card.innerHTML = `
+        <div style="font-size:52px">⚙️</div>
+        <h2>설정</h2>
+        <p>진행을 처음부터 다시 시작할 수 있어요.<br>
+        (다음 친구가 이 태블릿을 쓸 때 선생님이 사용해요)</p>`;
+      const btns = el('div', 'quit-btns');
+      const reset = button('🗑️ 처음부터 다시 시작', () => {
+        // 실수 방지 2단계 확인
+        reset.remove();
+        const really = button(`정말 초기화 (⭐ ${save.totalStars()}개 삭제)`, () => {
+          save.reset();
+          mgr.go('title');
+        }, 'btn pink');
+        btns.prepend(really);
+      }, 'btn ghost');
+      const close = button('닫기', () => overlay.remove(), 'btn mint');
+      btns.append(reset, close);
+      card.appendChild(btns);
+      overlay.appendChild(card);
+      scene.appendChild(overlay);
+    }
 
     root.appendChild(scene);
   };
