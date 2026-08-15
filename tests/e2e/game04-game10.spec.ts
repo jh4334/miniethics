@@ -22,7 +22,7 @@ test('game04 characterization preserves all six cases, score, and finish', async
   for (let index = 0; index < accounts.length; index++) {
     await expect(page.locator('.g04-account')).toContainText(accounts[index]);
     await expect(page.locator('.g04-badge')).toHaveText(`사건 ${index + 1}/6`);
-    await page.waitForTimeout(500);
+    await expect(page.locator('.g04-verdict:not(.g04-lock)')).toBeVisible();
     await page.getByRole('button', { name: real[index] ? /진짜야/ : /가짜야/ }).click();
     await expect(page.locator('.g04-next')).toBeVisible({ timeout: 2_500 });
     await page.locator('.g04-next').click();

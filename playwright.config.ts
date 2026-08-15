@@ -1,6 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
+import { execFileSync } from 'node:child_process';
 
-process.env.MINIETHICS_E2E_PORT ??= String(20_000 + (process.pid % 20_000));
+process.env.MINIETHICS_E2E_PORT ??= execFileSync(
+  process.execPath,
+  ['scripts/allocate-port.mjs'],
+  { encoding: 'utf8' }
+).trim();
 const port = Number(process.env.MINIETHICS_E2E_PORT);
 
 export default defineConfig({

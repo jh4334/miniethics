@@ -362,9 +362,14 @@ body:not(.portrait) #rotate-hint {
   #stage:focus-visible,
   h1:focus-visible,
   h2:focus-visible,
-  h3:focus-visible {
+  h3:focus-visible,
+  .g10-modal .btn:focus {
     forced-color-adjust: none;
     outline: 4px solid CanvasText;
+  }
+
+  .cloud {
+    display: none;
   }
 }
 

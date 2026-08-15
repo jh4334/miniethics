@@ -11,7 +11,7 @@ Miniethics is a bright, cel-shaded AI ethics adventure for Korean grade 5–6 le
 - Supporting accents: pink `#ff8fb1`, mint `#6ee7c8`, sky `#7cc7ff`, orange `#ffab5e`.
 - Text: ink `#3a3352`, soft ink `#6b6488`; surfaces: paper `#fffdf5`, cream `#fff7e0`.
 - Focus must remain visible independently of fill color. Correct, wrong, current, locked, and selected states must not rely on color alone.
-- Extracted game views use the shared `--game-*` surface, overlay, disabled, focus, and semantic palette tokens. Game modules do not introduce untracked color literals.
+- Extracted Game 04/10 view styles use the shared `--game-*` surface, overlay, disabled, focus, and semantic palette tokens. Per-case illustration colors remain typed content data rather than shared UI styling.
 
 ## 3. Typography
 

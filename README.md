@@ -27,8 +27,8 @@ npm run dev        # 개발 서버 (http://localhost:5173)
 npm run dev:lan    # 신뢰할 수 있는 교실 네트워크에만 공개
 npm run build      # 배포용 빌드 → dist/
 npm run preview    # 빌드 결과 미리보기
-npm test           # 단위·계약 테스트
-npm run test:unit  # 단위·계약 테스트
+npm test           # 단위 테스트
+npm run test:unit  # 단위 테스트
 npm run test:contracts # 커리큘럼·에셋·모듈 계약
 npm run test:e2e   # 실제 Chromium 학습 흐름 테스트
 npm run check:ci   # 배포 전 전체 품질 게이트

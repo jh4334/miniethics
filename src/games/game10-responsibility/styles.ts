@@ -80,6 +80,10 @@ export const GAME10_STYLES = `
 .g10-modal-card .g10-t { font-size:32px; font-weight:800; margin:8px 0 10px; }
 .g10-modal-card .g10-d { font-size:25px; line-height:1.6; color:var(--ink-soft); font-weight:700;
   margin-bottom:18px; }
+.g10-modal .btn:focus {
+  outline:8px solid var(--purple-dark); outline-offset:4px;
+  box-shadow:0 0 0 5px var(--game-white), 0 0 0 13px var(--purple-dark);
+}
 
 /* C: 책임 나누기 */
 .g10-defrow { display:flex; gap:14px; justify-content:center; }
