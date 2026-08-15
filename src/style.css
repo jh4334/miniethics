@@ -30,6 +30,7 @@
   --radius: 22px;
   --font: 'SUIT Variable', 'SUIT', -apple-system, 'Apple SD Gothic Neo',
     'Noto Sans KR', sans-serif;
+  --minimum-target-size: 44px;
 }
 
 * {
@@ -120,9 +121,23 @@ button,
   -webkit-user-select: text;
 }
 
+.dialog-text,
+.summary-card,
+.quiz-card,
+.howto-desc,
+.map-toast,
+.error-card,
+.hud-title,
+.island-label {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-break: strict;
+}
+
 #viewport {
   position: fixed;
-  inset: 0;
+  inset: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0)
+    env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -132,11 +147,28 @@ button,
 #stage {
   width: 1280px;
   height: 800px;
+  flex: 0 0 1280px;
   position: relative;
   transform-origin: center center;
   background: linear-gradient(180deg, #b8e3ff 0%, #e6f6ff 60%, #fff9e8 100%);
   border-radius: 0;
   overflow: hidden;
+}
+
+.btn,
+.icon-btn,
+.quiz-choice,
+.dialog-box,
+.island {
+  min-height: var(--minimum-target-size);
+}
+
+.icon-btn {
+  min-width: var(--minimum-target-size);
+}
+
+.btn {
+  min-width: var(--minimum-target-size);
 }
 
 /* ---------- 전역 에러 복구 / 이탈 확인 오버레이 ---------- */
@@ -247,7 +279,7 @@ button,
 #rotate-hint {
   position: fixed;
   left: 50%;
-  bottom: 26px;
+  bottom: calc(26px + env(safe-area-inset-bottom, 0px));
   transform: translateX(-50%) translateY(90px);
   background: rgba(44, 37, 71, 0.92);
   color: #fff;
@@ -264,6 +296,43 @@ button,
 body.portrait #rotate-hint.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+body:not(.portrait) #rotate-hint {
+  display: none;
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --ink-soft: #4c4568;
+    --purple: #5835eb;
+    --purple-dark: #39229f;
+  }
+
+  .card,
+  .dialog-box,
+  .quiz-choice,
+  .hud-title,
+  .island-label {
+    border-color: var(--ink);
+    box-shadow: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .skip-link:focus-visible,
+  .btn:focus-visible,
+  .icon-btn:focus-visible,
+  .quiz-choice:focus-visible,
+  .island:focus-visible,
+  .dialog-box:focus-visible,
+  #stage:focus-visible,
+  h1:focus-visible,
+  h2:focus-visible,
+  h3:focus-visible {
+    forced-color-adjust: none;
+    outline: 4px solid CanvasText;
+  }
 }
 
 /* ---------- 씬 공통 ---------- */

@@ -36,7 +36,7 @@ Scene entrance, bobbing characters, clouds, waves, focus pulses, typing, feedbac
 
 ## 7. Responsive and input contract
 
-The single 1280×800 coordinate system is preserved and fitted to the available viewport. Keyboard, touch, pointer, and switch-style activation share the same actions. Browser zoom must remain available. Safe-area, contrast, coarse-pointer, portrait, CJK wrapping, and 375/768/1280 viewport rules are extended in Stage 8.
+The single 1280×800 coordinate system is preserved and fitted inside the safe-area-adjusted viewport. Keyboard, touch, pointer, and switch-style activation share the same actions. Browser zoom remains available. The installed app supports both portrait and landscape; portrait mode recommends rotation without blocking progress. At 375, 768, and 1280 px viewports, the layout derives a logical target size that preserves a 44 physical px minimum. Korean copy uses strict phrase-aware wrapping, and increased-contrast or forced-color preferences retain visible boundaries and focus.
 
 ## 8. Accessibility personas and acceptance
 
@@ -52,9 +52,6 @@ The target is WCAG 2.2 AA for the core journey. New scenes focus their heading, 
 
 | Item | Severity | Resolution |
 | --- | --- | --- |
-| Browser zoom is blocked by the current viewport meta | Major | Stage 8 removes the restriction and verifies 200% zoom |
-| Fixed-canvas safe-area and forced-colors behavior are not yet specified | Major | Stage 8 adds tokens, rules, and browser coverage |
 | Individual mini-games beyond the core journey have uneven focus semantics | Moderate | Stage 9 all-game smoke records failures; incremental game fixes follow contract evidence |
-| Canvas scaling can make logical targets physically small on narrow portrait screens | Moderate | Stage 8 establishes coarse-pointer target sizing and viewport acceptance |
 
 No Critical accessibility debt is accepted. Major debt must have an active stage and executable acceptance test.

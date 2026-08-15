@@ -7,12 +7,20 @@ import { gameScene } from './scenes/game';
 import { resultScene } from './scenes/result';
 import { soonScene } from './scenes/soon';
 import { renderSceneError } from './ui/scene-error';
+import { calculateStageLayout } from './core/stage-layout';
 
 const stage = requireStage();
+const viewport = requireViewport();
 
 function requireStage(): HTMLElement {
   const element = document.getElementById('stage');
   if (!element) throw new Error('stage element is missing');
+  return element;
+}
+
+function requireViewport(): HTMLElement {
+  const element = document.getElementById('viewport');
+  if (!element) throw new Error('viewport element is missing');
   return element;
 }
 
@@ -21,8 +29,9 @@ function requireStage(): HTMLElement {
 let hintTimer: number | null = null;
 
 function fit() {
-  const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 800);
+  const { scale, minimumTargetSize } = calculateStageLayout(viewport.clientWidth, viewport.clientHeight);
   stage.style.transform = `scale(${scale})`;
+  stage.style.setProperty('--minimum-target-size', `${minimumTargetSize}px`);
   const portrait = window.innerHeight > window.innerWidth;
   const wasPortrait = document.body.classList.contains('portrait');
   document.body.classList.toggle('portrait', portrait);
