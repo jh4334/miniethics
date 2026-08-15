@@ -140,10 +140,13 @@ window.addEventListener('error', showErrorRecovery);
 window.addEventListener('unhandledrejection', showErrorRecovery);
 
 // ---------- PWA 서비스워커 ----------
-if ('serviceWorker' in navigator && !location.hostname.includes('localhost')) {
+if ('serviceWorker' in navigator && location.hostname !== 'localhost' && location.hostname !== '[::1]') {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {
-      /* 오프라인 캐시는 선택 기능 - 실패해도 게임은 동작 */
-    });
+    navigator.serviceWorker
+      .register('./sw.js')
+      .then((registration) => registration.update())
+      .catch((error: unknown) => {
+        if (import.meta.env.DEV) console.warn('[miniethics] service worker unavailable', error);
+      });
   });
 }

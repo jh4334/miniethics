@@ -1,55 +1,95 @@
-// 오프라인 캐시 서비스워커 v2
-// - 같은 출처의 정상(200) 응답만 캐시
-// - 런타임 캐시를 최대 160개로 제한(오래된 것부터 정리)해 저장소 무한 누적 방지
-const CACHE_VERSION = 'miniethics-v2';
+const SHELL_CACHE = 'miniethics-shell-v2';
+const RUNTIME_CACHE = 'miniethics-runtime-v2';
 const RUNTIME_LIMIT = 160;
-const PRECACHE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png'];
+const SHELL_ASSETS = [
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './icons/icon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
+];
 
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_VERSION).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting())
-  );
+self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open(SHELL_CACHE).then((cache) => cache.addAll(SHELL_ASSETS)));
 });
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k))))
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter(
+              (key) =>
+                key.startsWith('miniethics-') && key !== SHELL_CACHE && key !== RUNTIME_CACHE
+            )
+            .map((key) => caches.delete(key))
+        )
+      )
       .then(() => self.clients.claim())
   );
 });
 
-async function trimCache(cache) {
+async function trimRuntimeCache(cache) {
   const keys = await cache.keys();
-  if (keys.length <= RUNTIME_LIMIT) return;
-  // 앞쪽(오래된) 항목부터 제거
-  for (const key of keys.slice(0, keys.length - RUNTIME_LIMIT)) {
+  for (const key of keys.slice(0, Math.max(0, keys.length - RUNTIME_LIMIT))) {
     await cache.delete(key);
   }
 }
 
-// 네트워크 우선, 실패 시 캐시 (수업 중 오프라인 대비)
-self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET') return;
-  const url = new URL(e.request.url);
-  if (url.origin !== self.location.origin) return; // 타 출처는 관여하지 않음
+function isCacheable(response) {
+  return response.ok && response.type === 'basic';
+}
 
-  e.respondWith(
-    fetch(e.request)
-      .then((res) => {
-        if (res && res.status === 200) {
-          const copy = res.clone();
-          caches
-            .open(CACHE_VERSION)
-            .then(async (cache) => {
-              await cache.put(e.request, copy);
-              await trimCache(cache);
-            })
-            .catch(() => {});
-        }
-        return res;
-      })
-      .catch(() => caches.match(e.request).then((hit) => hit || caches.match('./index.html')))
+function isAssetRequest(request) {
+  return (
+    request.destination === 'script' ||
+    request.destination === 'style' ||
+    request.destination === 'font' ||
+    request.destination === 'image'
   );
+}
+
+async function cacheRuntime(request, response) {
+  const cache = await caches.open(RUNTIME_CACHE);
+  await cache.put(request, response.clone());
+  await trimRuntimeCache(cache);
+}
+
+async function respondToNavigation(request) {
+  try {
+    return await fetch(request);
+  } catch {
+    const fallback = await caches.match('./index.html');
+    return fallback ?? Response.error();
+  }
+}
+
+async function respondToAsset(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+  const response = await fetch(request);
+  if (isCacheable(response)) {
+    try {
+      await cacheRuntime(request, response);
+    } catch (error) {
+      console.warn('[miniethics] runtime cache write failed', error);
+    }
+  }
+  return response;
+}
+
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+
+  if (request.mode === 'navigate') {
+    event.respondWith(respondToNavigation(request));
+    return;
+  }
+  if (isAssetRequest(request)) event.respondWith(respondToAsset(request));
 });
