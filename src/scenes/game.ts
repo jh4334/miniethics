@@ -21,6 +21,31 @@ export function gameScene(mgr: SceneManager) {
     let cleanup: void | (() => void) = undefined;
     let done = false;
 
+    // 이탈 확인 대화상자 (이탈 버튼과 하드웨어 뒤로가기가 공용으로 사용)
+    function requestQuit() {
+      if (done || scene.querySelector('.quit-confirm')) return;
+      const confirm = el('div', 'quit-confirm');
+      const card = el('div', 'card quit-card');
+      card.innerHTML = `
+        <div style="font-size:56px">🤔</div>
+        <h2>정말 그만둘까?</h2>
+        <p>지금 하던 게임 내용은 사라져요.<br>(지금까지 모은 별은 안전해요!)</p>`;
+      const btns = el('div', 'quit-btns');
+      btns.append(
+        button('계속 할래! 💪', () => confirm.remove(), 'btn big mint'),
+        button('그만둘래', () => {
+          if (done) return;
+          done = true;
+          mgr.go('worldmap');
+        }, 'btn ghost')
+      );
+      card.appendChild(btns);
+      confirm.appendChild(card);
+      scene.appendChild(confirm);
+    }
+    const onBack = () => requestQuit();
+    window.addEventListener('miniethics-back', onBack);
+
     // 게임 방법 안내 오버레이 → 확인 후 게임 마운트
     const overlay = el('div', 'howto-overlay');
     const card = el('div', 'card howto-card');
@@ -39,25 +64,7 @@ export function gameScene(mgr: SceneManager) {
         },
         quit() {
           // 실수로 이탈 버튼을 눌러 진행을 날리지 않도록 확인을 거친다
-          if (done || scene.querySelector('.quit-confirm')) return;
-          const confirm = el('div', 'quit-confirm');
-          const card = el('div', 'card quit-card');
-          card.innerHTML = `
-            <div style="font-size:56px">🤔</div>
-            <h2>정말 그만둘까?</h2>
-            <p>지금 하던 게임 내용은 사라져요.<br>(지금까지 모은 별은 안전해요!)</p>`;
-          const btns = el('div', 'quit-btns');
-          btns.append(
-            button('계속 할래! 💪', () => confirm.remove(), 'btn big mint'),
-            button('그만둘래', () => {
-              if (done) return;
-              done = true;
-              mgr.go('worldmap');
-            }, 'btn ghost')
-          );
-          card.appendChild(btns);
-          confirm.appendChild(card);
-          scene.appendChild(confirm);
+          requestQuit();
         }
       });
     }, 'btn big yellow');
@@ -66,6 +73,7 @@ export function gameScene(mgr: SceneManager) {
     scene.appendChild(overlay);
 
     return () => {
+      window.removeEventListener('miniethics-back', onBack);
       if (cleanup) cleanup();
     };
   };

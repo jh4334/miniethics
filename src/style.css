@@ -133,6 +133,77 @@ img {
   justify-content: center;
 }
 
+/* ---------- 월드맵 안내 토스트 (잠긴 섬 등) ---------- */
+.map-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%) translateY(80px);
+  background: rgba(44, 37, 71, 0.92);
+  color: #fff;
+  font-size: 21px;
+  font-weight: 700;
+  padding: 14px 26px;
+  border-radius: 999px;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  white-space: nowrap;
+}
+.map-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ---------- 진행 요약 표 ---------- */
+.summary-table-card {
+  width: 760px;
+}
+.sum-list {
+  max-height: 420px;
+  overflow-y: auto;
+  text-align: left;
+  margin-bottom: 16px;
+}
+.sum-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 2px solid #f0ead9;
+  font-size: 20px;
+}
+.sum-row.todo {
+  opacity: 0.5;
+}
+.sum-id {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--purple);
+  color: #fff;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  font-size: 17px;
+}
+.sum-name {
+  flex: 1;
+  font-weight: 700;
+}
+.sum-stars {
+  font-size: 16px;
+}
+.sum-score {
+  color: var(--ink-soft);
+  font-size: 17px;
+  min-width: 150px;
+  text-align: right;
+}
+
 /* ---------- 회전 안내 토스트 (세로모드에서도 플레이 가능, 안내만) ---------- */
 #rotate-hint {
   position: fixed;
@@ -796,6 +867,15 @@ body.portrait #rotate-hint.show {
 .result-final .score-line {
   font-size: 24px;
   color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.result-final .star-guide {
+  font-size: 17px;
+  color: var(--ink-soft);
+  background: var(--cream);
+  border-radius: 999px;
+  padding: 8px 18px;
+  display: inline-block;
   margin-bottom: 20px;
 }
 .result-btns {

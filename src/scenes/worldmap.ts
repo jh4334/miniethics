@@ -58,6 +58,13 @@ export function worldmapScene(mgr: SceneManager) {
       isl.addEventListener('click', () => {
         if (!unlocked) {
           audio.bad();
+          // 왜 잠겨 있는지 + 무엇을 하면 열리는지 안내
+          const prev = LESSONS.find((x) => x.id === lesson.id - 1);
+          showMapToast(
+            prev
+              ? `🔒 먼저 ${prev.id}차시 「${prev.islandName}」을 클리어하면 열려요!`
+              : '🔒 아직 잠겨 있어요!'
+          );
           isl.animate(
             [
               { transform: 'translate(-50%,-50%) rotate(0deg)' },
@@ -87,6 +94,20 @@ export function worldmapScene(mgr: SceneManager) {
       scene.appendChild(hero);
     }
 
+    // ---------- 잠긴 섬 안내 토스트 ----------
+    let toastTimer: number | null = null;
+    function showMapToast(msg: string) {
+      let toast = scene.querySelector<HTMLElement>('.map-toast');
+      if (!toast) {
+        toast = el('div', 'map-toast');
+        scene.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => toast!.classList.remove('show'), 2400);
+    }
+
     // 상단 HUD
     const hud = el('div', 'hud');
     const home = button('🏠', () => mgr.go('title'), 'icon-btn', '타이틀로 가기');
@@ -110,12 +131,24 @@ export function worldmapScene(mgr: SceneManager) {
     function openSettings() {
       const overlay = el('div', 'quit-confirm');
       const card = el('div', 'card quit-card');
+      let errCount = 0;
+      try {
+        errCount = (JSON.parse(localStorage.getItem('miniethics-errlog') || '[]') as unknown[])
+          .length;
+      } catch {
+        /* 무시 */
+      }
       card.innerHTML = `
         <div style="font-size:52px">⚙️</div>
         <h2>설정</h2>
         <p>진행을 처음부터 다시 시작할 수 있어요.<br>
-        (다음 친구가 이 태블릿을 쓸 때 선생님이 사용해요)</p>`;
+        (다음 친구가 이 태블릿을 쓸 때 선생님이 사용해요)</p>
+        <p style="font-size:15px">버전 v${__APP_VERSION__}${errCount ? ` · 최근 오류 기록 ${errCount}건` : ''}</p>`;
       const btns = el('div', 'quit-btns');
+      const summaryBtn = button('📋 진행 요약', () => {
+        overlay.remove();
+        openSummary();
+      }, 'btn');
       const reset = button('🗑️ 처음부터 다시 시작', () => {
         // 실수 방지 2단계 확인
         reset.remove();
@@ -126,8 +159,30 @@ export function worldmapScene(mgr: SceneManager) {
         btns.prepend(really);
       }, 'btn ghost');
       const close = button('닫기', () => overlay.remove(), 'btn mint');
-      btns.append(reset, close);
+      btns.append(summaryBtn, reset, close);
       card.appendChild(btns);
+      overlay.appendChild(card);
+      scene.appendChild(overlay);
+    }
+
+    // ---------- 진행 요약 (교사 순회 지도·성취 확인용) ----------
+    function openSummary() {
+      const overlay = el('div', 'quit-confirm');
+      const card = el('div', 'card quit-card summary-table-card');
+      const rows = LESSONS.map((l) => {
+        const r = save.record(l.id);
+        return `<div class="sum-row ${r.cleared ? '' : 'todo'}">
+          <span class="sum-id">${l.id}</span>
+          <span class="sum-name">${l.gameName}</span>
+          <span class="sum-stars">${r.cleared ? starsHtml(r.stars) : '—'}</span>
+          <span class="sum-score">${r.cleared ? `${r.bestScore}점 · 퀴즈 ${r.quizBest}/3` : '미완료'}</span>
+        </div>`;
+      }).join('');
+      card.innerHTML = `
+        <h2>📋 진행 요약</h2>
+        <p>⭐ ${save.totalStars()} / ${LESSONS.length * 3} · 완료 ${save.clearedCount()} / ${LESSONS.length}차시</p>
+        <div class="sum-list">${rows}</div>`;
+      card.appendChild(button('닫기', () => overlay.remove(), 'btn mint'));
       overlay.appendChild(card);
       scene.appendChild(overlay);
     }
@@ -166,5 +221,23 @@ export function worldmapScene(mgr: SceneManager) {
     }
 
     root.appendChild(scene);
+
+    // ---------- 다음 차시 에셋 프리페치 (스토리 진입 시 배경·캐릭터 팝인 방지) ----------
+    const idle: (cb: () => void) => void =
+      'requestIdleCallback' in window
+        ? (cb) => (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(cb)
+        : (cb) => window.setTimeout(cb, 400);
+    idle(() => {
+      const nn = String(current.id).padStart(2, '0');
+      const urls = [
+        `./assets/game${nn}/bg.webp`,
+        `./assets/game${nn}/${current.chars.right}.webp`,
+        `./assets/common/eti.webp`
+      ];
+      for (const u of urls) {
+        const img = new Image();
+        img.src = u;
+      }
+    });
   };
 }

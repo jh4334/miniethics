@@ -115,10 +115,19 @@ export function storyScene(mgr: SceneManager) {
     }
 
     box.addEventListener('click', advance);
+    // 데스크톱/발표용: Enter·Space로도 대화 진행
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        advance();
+      }
+    };
+    window.addEventListener('keydown', onKey);
     showLine();
 
     root.appendChild(scene);
     return () => {
+      window.removeEventListener('keydown', onKey);
       if (typing) clearInterval(typing);
     };
   };

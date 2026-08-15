@@ -57,6 +57,12 @@ mgr.onNavigate = (id) => {
   if (!popNav && id !== 'title') history.pushState({ scene: id }, '');
 };
 window.addEventListener('popstate', () => {
+  // 게임 중 뒤로가기는 즉시 이동하지 않고, 게임 씬의 이탈 확인 대화상자로 위임한다
+  if (mgr.current === 'game') {
+    history.pushState({ scene: 'game' }, ''); // 소비된 히스토리 엔트리 복원
+    window.dispatchEvent(new CustomEvent('miniethics-back'));
+    return;
+  }
   const parent = mgr.current ? PARENT[mgr.current] : null;
   if (!parent) return; // 타이틀에서는 브라우저 기본 동작(이탈) 허용
   popNav = true;
@@ -72,7 +78,27 @@ mgr.go('title');
 // ---------- 전역 에러 복구 ----------
 // 게임 도중 예기치 못한 오류가 나도 멈추지 않고 월드맵으로 돌아갈 수 있게 한다
 let errorShown = false;
-function showErrorRecovery() {
+
+/** 최근 오류 5건을 저장해 두어 교사/개발자가 설정 화면에서 확인할 수 있게 한다 */
+function logError(detail: string) {
+  try {
+    const KEY = 'miniethics-errlog';
+    const log: { t: string; m: string }[] = JSON.parse(localStorage.getItem(KEY) || '[]');
+    log.push({ t: new Date().toISOString(), m: detail.slice(0, 300) });
+    localStorage.setItem(KEY, JSON.stringify(log.slice(-5)));
+  } catch {
+    /* 로그 실패는 무시 */
+  }
+}
+
+function showErrorRecovery(e?: Event) {
+  const detail =
+    e instanceof ErrorEvent
+      ? e.message
+      : e instanceof PromiseRejectionEvent
+        ? String(e.reason)
+        : 'unknown';
+  logError(detail);
   if (errorShown) return;
   errorShown = true;
   const overlay = document.createElement('div');

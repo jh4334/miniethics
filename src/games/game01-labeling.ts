@@ -158,7 +158,10 @@ export const game01: MiniGame = {
       progress.remove();
 
       const accuracy = items.length ? correct / items.length : 0;
-      speech.textContent = '배운 걸 시험해 볼게! 두구두구…';
+      speech.textContent =
+        timeLeft <= 0
+          ? '⏰ 시간 끝! 여기까지 배운 걸로 시험 볼게!'
+          : '배운 걸 시험해 볼게! 두구두구…';
       ctx.audio.pop();
 
       let testIdx = 0;
@@ -179,7 +182,9 @@ export const game01: MiniGame = {
         timers.push(
           window.setTimeout(() => {
             // 내가 가르친 정확도만큼 쿡봇이 맞힌다
-            const ok = Math.random() < accuracy;
+            // (같은 실력이면 항상 같은 결과가 나오도록 결정론적으로 고르게 분배)
+            const ok =
+              Math.round((testIdx + 1) * accuracy) > Math.round(testIdx * accuracy);
             if (ok) {
               aiCorrect++;
               verdict.textContent = `"${t.name}는 ${t.kind === 'fruit' ? '과일' : '채소'}!" ⭕`;
