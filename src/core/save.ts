@@ -15,8 +15,7 @@ export interface SaveData {
 
 function load(): SaveData {
   try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) return sanitize(JSON.parse(raw));
+    return parseSaveData(localStorage.getItem(KEY));
   } catch {
     /* 손상된 저장 데이터는 무시하고 새로 시작 */
   }
@@ -24,24 +23,51 @@ function load(): SaveData {
 }
 
 /** 외부 저장소에서 온 데이터를 신뢰하지 않고 형태·범위를 검증한다 */
-function sanitize(data: unknown): SaveData {
+export function parseSaveData(raw: string | null): SaveData {
   const out: SaveData = { records: {} };
-  if (!data || typeof data !== 'object') return out;
-  const records = (data as { records?: unknown }).records;
-  if (!records || typeof records !== 'object') return out;
-  for (const [k, v] of Object.entries(records as Record<string, unknown>)) {
-    const id = Number(k);
-    if (!Number.isInteger(id) || id < 1 || id > 12) continue;
-    if (!v || typeof v !== 'object') continue;
-    const r = v as Partial<LessonRecord>;
-    out.records[id] = {
-      stars: clampInt(r.stars, 0, 3),
-      bestScore: clampInt(r.bestScore, 0, 100),
-      quizBest: clampInt(r.quizBest, 0, 3),
-      cleared: r.cleared === true
-    };
+  if (!raw) return out;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return out;
+  }
+
+  if (!isRecord(parsed) || !isRecord(parsed.records)) return out;
+  for (const [key, value] of Object.entries(parsed.records)) {
+    if (!/^(?:[1-9]|1[0-2])$/.test(key)) continue;
+    const record = parseLessonRecord(value);
+    if (!record) continue;
+    out.records[Number(key)] = record;
   }
   return out;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function parseLessonRecord(value: unknown): LessonRecord | null {
+  if (!isRecord(value)) return null;
+  if (
+    typeof value.stars !== 'number' ||
+    typeof value.bestScore !== 'number' ||
+    typeof value.quizBest !== 'number' ||
+    typeof value.cleared !== 'boolean' ||
+    !Number.isFinite(value.stars) ||
+    !Number.isFinite(value.bestScore) ||
+    !Number.isFinite(value.quizBest)
+  ) {
+    return null;
+  }
+
+  return {
+    stars: clampInt(value.stars, 0, 3),
+    bestScore: clampInt(value.bestScore, 0, 100),
+    quizBest: clampInt(value.quizBest, 0, 3),
+    cleared: value.cleared
+  };
 }
 
 function clampInt(v: unknown, min: number, max: number): number {
@@ -68,11 +94,12 @@ export const save = {
 
   /** 차시 결과 반영 (기존 기록보다 좋을 때만 갱신) */
   report(lessonId: number, stars: number, score: number, quizCorrect: number) {
+    if (!Number.isInteger(lessonId) || lessonId < 1 || lessonId > 12) return;
     const prev = save.record(lessonId);
     data.records[lessonId] = {
-      stars: Math.max(prev.stars, stars),
-      bestScore: Math.max(prev.bestScore, score),
-      quizBest: Math.max(prev.quizBest, quizCorrect),
+      stars: Math.max(prev.stars, clampInt(stars, 0, 3)),
+      bestScore: Math.max(prev.bestScore, clampInt(score, 0, 100)),
+      quizBest: Math.max(prev.quizBest, clampInt(quizCorrect, 0, 3)),
       cleared: true
     };
     persist();
