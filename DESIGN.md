@@ -55,3 +55,9 @@ The target is WCAG 2.2 AA for the core journey. New scenes focus their heading, 
 | Individual mini-games beyond the core journey have uneven focus semantics | Moderate | Stage 9 all-game smoke records failures; incremental game fixes follow contract evidence |
 
 No Critical accessibility debt is accepted. Major debt must have an active stage and executable acceptance test.
+
+## 9. Module and quality contract
+
+Each lesson remains discoverable through `LESSONS` and `GAMES` with matching IDs. Game 04 and Game 10 keep their public `MiniGame` entry modules while static case data, shared types, and scoped CSS live in focused submodules. Every game mount owns its timers, injected style element, and DOM root and removes them from the returned cleanup function.
+
+The repository quality gate validates all 12 lessons and games, the exact character/background inventory, icon and font headers, save and scene boundaries, accessibility, adaptive layouts, offline behavior, and a real Chromium mount for every game. Pull requests and Pages deployment both run `npm run check:ci`.

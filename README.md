@@ -27,7 +27,9 @@ npm run dev        # 개발 서버 (http://localhost:5173)
 npm run dev:lan    # 신뢰할 수 있는 교실 네트워크에만 공개
 npm run build      # 배포용 빌드 → dist/
 npm run preview    # 빌드 결과 미리보기
-npm run test:smoke # 12차시 전체 회귀 스모크 테스트 (preview 실행 상태에서)
+npm run test:unit  # 단위·계약 테스트
+npm run test:e2e   # 실제 Chromium 학습 흐름 테스트
+npm run check:ci   # 배포 전 전체 품질 게이트
 ```
 
 ## 수업 운영 팁
@@ -48,8 +50,8 @@ npm run test:smoke # 12차시 전체 회귀 스모크 테스트 (preview 실행 
 
 ## 그림 교체
 
-지금 그림은 플레이스홀더입니다. GPT로 만든 귀여운 그림으로
-**같은 파일명 덮어쓰기**만 하면 바로 교체됩니다 → [docs/asset-guide.md](docs/asset-guide.md)
+캐릭터 14종, 배경 14종, 앱 아이콘은 완성된 PNG가 적용되어 있습니다.
+파일 규격과 안전한 교체 절차는 [docs/asset-guide.md](docs/asset-guide.md)를 참고하세요.
 
 ## 새 미니게임 추가하기
 
