@@ -6,8 +6,15 @@ import { storyScene } from './scenes/story';
 import { gameScene } from './scenes/game';
 import { resultScene } from './scenes/result';
 import { soonScene } from './scenes/soon';
+import { renderSceneError } from './ui/scene-error';
 
-const stage = document.getElementById('stage')!;
+const stage = requireStage();
+
+function requireStage(): HTMLElement {
+  const element = document.getElementById('stage');
+  if (!element) throw new Error('stage element is missing');
+  return element;
+}
 
 // ---------- 1280x800 스테이지를 화면에 맞게 스케일 ----------
 // 세로모드에서도 화면에 맞춰 축소되어 그대로 플레이 가능 (가로 권장 안내만 표시)
@@ -15,7 +22,7 @@ let hintTimer: number | null = null;
 
 function fit() {
   const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 800);
-  (stage as HTMLElement).style.transform = `scale(${scale})`;
+  stage.style.transform = `scale(${scale})`;
   const portrait = window.innerHeight > window.innerWidth;
   const wasPortrait = document.body.classList.contains('portrait');
   document.body.classList.toggle('portrait', portrait);
@@ -33,13 +40,18 @@ window.addEventListener('orientationchange', fit);
 fit();
 
 // ---------- 씬 등록 ----------
-const mgr = new SceneManager(stage as HTMLElement);
+export const mgr = new SceneManager(stage);
 mgr.register('title', titleScene(mgr));
 mgr.register('worldmap', worldmapScene(mgr));
 mgr.register('story', storyScene(mgr));
 mgr.register('game', gameScene(mgr));
 mgr.register('result', resultScene(mgr));
 mgr.register('soon', soonScene(mgr));
+mgr.onError = (id, error) => {
+  logError(error instanceof Error ? error.message : String(error));
+  const destination = id === 'worldmap' ? 'title' : 'worldmap';
+  renderSceneError(stage, destination, () => mgr.go(destination));
+};
 // ---------- 뒤로가기: 앱 이탈 대신 상위 화면으로 ----------
 // 태블릿/폰의 뒤로가기(브라우저 back)가 앱을 종료시키지 않고
 // 게임→월드맵→타이틀 순서로 한 단계씩 올라가게 한다
@@ -122,7 +134,7 @@ function showErrorRecovery(e?: Event) {
     }
   });
   overlay.querySelector('.error-card')!.appendChild(btn);
-  (stage as HTMLElement).appendChild(overlay);
+  stage.appendChild(overlay);
 }
 window.addEventListener('error', showErrorRecovery);
 window.addEventListener('unhandledrejection', showErrorRecovery);

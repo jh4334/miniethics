@@ -13,6 +13,7 @@ export class SceneManager {
   current: SceneId | null = null;
   /** 씬 전환 직후 호출되는 훅 */
   onNavigate?: (id: SceneId) => void;
+  onError?: (id: SceneId, error: unknown) => void;
 
   constructor(private root: HTMLElement) {}
 
@@ -23,11 +24,20 @@ export class SceneManager {
   go(id: SceneId, params: SceneParams = {}) {
     const factory = this.scenes.get(id);
     if (!factory) throw new Error(`unknown scene: ${id}`);
-    if (this.cleanup) this.cleanup();
+    const previousCleanup = this.cleanup;
     this.cleanup = undefined;
-    this.root.innerHTML = '';
-    this.cleanup = factory(this.root, params);
-    this.current = id;
-    this.onNavigate?.(id);
+    try {
+      if (previousCleanup) previousCleanup();
+      this.root.replaceChildren();
+      this.cleanup = factory(this.root, params);
+      this.current = id;
+      this.onNavigate?.(id);
+    } catch (error) {
+      this.cleanup = undefined;
+      this.current = null;
+      this.root.replaceChildren();
+      if (!this.onError) throw error;
+      this.onError(id, error);
+    }
   }
 }

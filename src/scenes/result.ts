@@ -1,13 +1,13 @@
 import type { SceneManager, SceneParams } from '../core/scene';
 import { el, button } from '../ui/components';
-import { getLesson } from '../data/curriculum';
+import { getLessonFromParam } from '../data/curriculum';
 import { save } from '../core/save';
 import { audio } from '../core/audio';
 
 export function resultScene(mgr: SceneManager) {
   return (root: HTMLElement, params: SceneParams) => {
-    const lesson = getLesson(Number(params.lessonId));
-    const gameScore = Number(params.score ?? 0);
+    const lesson = getLessonFromParam(params.lessonId);
+    const gameScore = normalizeScore(params.score);
     const scene = el('div', 'scene result-scene');
     root.appendChild(scene);
 
@@ -152,4 +152,9 @@ export function resultScene(mgr: SceneManager) {
       window.removeEventListener('keydown', onKey);
     };
   };
+}
+
+function normalizeScore(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 0;
+  return Math.min(100, Math.max(0, Math.round(value)));
 }

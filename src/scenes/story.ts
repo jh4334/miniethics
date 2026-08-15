@@ -1,12 +1,12 @@
 import type { SceneManager, SceneParams } from '../core/scene';
 import { el, button } from '../ui/components';
-import { getLesson } from '../data/curriculum';
+import { getLessonFromParam } from '../data/curriculum';
 import { charImg, sceneBg } from '../assets-manifest';
 import { audio } from '../core/audio';
 
 export function storyScene(mgr: SceneManager) {
   return (root: HTMLElement, params: SceneParams) => {
-    const lesson = getLesson(Number(params.lessonId));
+    const lesson = getLessonFromParam(params.lessonId);
     const scene = el('div', 'scene story-scene');
     scene.style.background = `linear-gradient(180deg, ${lesson.color}55 0%, #fff8e6 100%)`;
     // 차시별 배경 이미지 (public/assets/gameNN/bg.png가 있으면 자동 적용)
