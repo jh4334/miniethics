@@ -136,5 +136,20 @@ export function resultScene(mgr: SceneManager) {
     }
 
     showSummary();
+
+    // 데스크톱/발표용: 숫자 1~3키로 퀴즈 선택지 선택
+    const onKey = (e: KeyboardEvent) => {
+      const n = Number(e.key);
+      if (!Number.isInteger(n) || n < 1 || n > 4) return;
+      const btns = scene.querySelectorAll<HTMLButtonElement>('.quiz-choice');
+      if (!btns.length) return;
+      // 이미 답한 화면이면 무시
+      if (scene.querySelector('.quiz-choice.correct, .quiz-choice.wrong')) return;
+      btns[n - 1]?.click();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+    };
   };
 }
