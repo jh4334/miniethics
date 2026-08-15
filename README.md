@@ -24,6 +24,7 @@
 ```bash
 npm install
 npm run dev        # 개발 서버 (http://localhost:5173)
+npm run dev:lan    # 신뢰할 수 있는 교실 네트워크에만 공개
 npm run build      # 배포용 빌드 → dist/
 npm run preview    # 빌드 결과 미리보기
 npm run test:smoke # 12차시 전체 회귀 스모크 테스트 (preview 실행 상태에서)
@@ -36,8 +37,9 @@ npm run test:smoke # 12차시 전체 회귀 스모크 테스트 (preview 실행 
 - 음소거(🔊)는 기기별로 저장됨. 뒤로가기는 앱 종료 대신 상위 화면으로 이동
 - 12차시 완주 시 'AI 윤리 수호자 임명장'이 1회 표시됨
 
-같은 와이파이의 태블릿에서 보려면 `npm run dev` 실행 후
-터미널에 표시되는 `Network:` 주소를 태블릿 브라우저에서 열면 됩니다.
+같은 와이파이의 태블릿에서 보려면 신뢰할 수 있는 교실 네트워크에서만
+`npm run dev:lan`을 실행하고, 터미널의 `Network:` 주소를 태블릿 브라우저에서 엽니다.
+기본 `npm run dev`는 이 컴퓨터에서만 접속할 수 있습니다.
 
 ## 배포 (GitHub Pages 등)
 
