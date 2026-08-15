@@ -133,6 +133,54 @@ img {
   justify-content: center;
 }
 
+/* ---------- 진행 요약 표 ---------- */
+.summary-table-card {
+  width: 760px;
+}
+.sum-list {
+  max-height: 420px;
+  overflow-y: auto;
+  text-align: left;
+  margin-bottom: 16px;
+}
+.sum-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 2px solid #f0ead9;
+  font-size: 20px;
+}
+.sum-row.todo {
+  opacity: 0.5;
+}
+.sum-id {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--purple);
+  color: #fff;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  font-size: 17px;
+}
+.sum-name {
+  flex: 1;
+  font-weight: 700;
+}
+.sum-stars {
+  font-size: 16px;
+}
+.sum-score {
+  color: var(--ink-soft);
+  font-size: 17px;
+  min-width: 150px;
+  text-align: right;
+}
+
 /* ---------- 회전 안내 토스트 (세로모드에서도 플레이 가능, 안내만) ---------- */
 #rotate-hint {
   position: fixed;

@@ -116,6 +116,10 @@ export function worldmapScene(mgr: SceneManager) {
         <p>진행을 처음부터 다시 시작할 수 있어요.<br>
         (다음 친구가 이 태블릿을 쓸 때 선생님이 사용해요)</p>`;
       const btns = el('div', 'quit-btns');
+      const summaryBtn = button('📋 진행 요약', () => {
+        overlay.remove();
+        openSummary();
+      }, 'btn');
       const reset = button('🗑️ 처음부터 다시 시작', () => {
         // 실수 방지 2단계 확인
         reset.remove();
@@ -126,8 +130,30 @@ export function worldmapScene(mgr: SceneManager) {
         btns.prepend(really);
       }, 'btn ghost');
       const close = button('닫기', () => overlay.remove(), 'btn mint');
-      btns.append(reset, close);
+      btns.append(summaryBtn, reset, close);
       card.appendChild(btns);
+      overlay.appendChild(card);
+      scene.appendChild(overlay);
+    }
+
+    // ---------- 진행 요약 (교사 순회 지도·성취 확인용) ----------
+    function openSummary() {
+      const overlay = el('div', 'quit-confirm');
+      const card = el('div', 'card quit-card summary-table-card');
+      const rows = LESSONS.map((l) => {
+        const r = save.record(l.id);
+        return `<div class="sum-row ${r.cleared ? '' : 'todo'}">
+          <span class="sum-id">${l.id}</span>
+          <span class="sum-name">${l.gameName}</span>
+          <span class="sum-stars">${r.cleared ? starsHtml(r.stars) : '—'}</span>
+          <span class="sum-score">${r.cleared ? `${r.bestScore}점 · 퀴즈 ${r.quizBest}/3` : '미완료'}</span>
+        </div>`;
+      }).join('');
+      card.innerHTML = `
+        <h2>📋 진행 요약</h2>
+        <p>⭐ ${save.totalStars()} / ${LESSONS.length * 3} · 완료 ${save.clearedCount()} / ${LESSONS.length}차시</p>
+        <div class="sum-list">${rows}</div>`;
+      card.appendChild(button('닫기', () => overlay.remove(), 'btn mint'));
       overlay.appendChild(card);
       scene.appendChild(overlay);
     }
