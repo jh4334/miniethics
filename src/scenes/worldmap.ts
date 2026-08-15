@@ -131,11 +131,19 @@ export function worldmapScene(mgr: SceneManager) {
     function openSettings() {
       const overlay = el('div', 'quit-confirm');
       const card = el('div', 'card quit-card');
+      let errCount = 0;
+      try {
+        errCount = (JSON.parse(localStorage.getItem('miniethics-errlog') || '[]') as unknown[])
+          .length;
+      } catch {
+        /* 무시 */
+      }
       card.innerHTML = `
         <div style="font-size:52px">⚙️</div>
         <h2>설정</h2>
         <p>진행을 처음부터 다시 시작할 수 있어요.<br>
-        (다음 친구가 이 태블릿을 쓸 때 선생님이 사용해요)</p>`;
+        (다음 친구가 이 태블릿을 쓸 때 선생님이 사용해요)</p>
+        <p style="font-size:15px">버전 v${__APP_VERSION__}${errCount ? ` · 최근 오류 기록 ${errCount}건` : ''}</p>`;
       const btns = el('div', 'quit-btns');
       const summaryBtn = button('📋 진행 요약', () => {
         overlay.remove();

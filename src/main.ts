@@ -78,7 +78,27 @@ mgr.go('title');
 // ---------- 전역 에러 복구 ----------
 // 게임 도중 예기치 못한 오류가 나도 멈추지 않고 월드맵으로 돌아갈 수 있게 한다
 let errorShown = false;
-function showErrorRecovery() {
+
+/** 최근 오류 5건을 저장해 두어 교사/개발자가 설정 화면에서 확인할 수 있게 한다 */
+function logError(detail: string) {
+  try {
+    const KEY = 'miniethics-errlog';
+    const log: { t: string; m: string }[] = JSON.parse(localStorage.getItem(KEY) || '[]');
+    log.push({ t: new Date().toISOString(), m: detail.slice(0, 300) });
+    localStorage.setItem(KEY, JSON.stringify(log.slice(-5)));
+  } catch {
+    /* 로그 실패는 무시 */
+  }
+}
+
+function showErrorRecovery(e?: Event) {
+  const detail =
+    e instanceof ErrorEvent
+      ? e.message
+      : e instanceof PromiseRejectionEvent
+        ? String(e.reason)
+        : 'unknown';
+  logError(detail);
   if (errorShown) return;
   errorShown = true;
   const overlay = document.createElement('div');
