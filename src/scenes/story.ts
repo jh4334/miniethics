@@ -1,12 +1,14 @@
 import type { SceneManager, SceneParams } from '../core/scene';
 import { el, button } from '../ui/components';
-import { getLesson } from '../data/curriculum';
+import { getLessonFromParam } from '../data/curriculum';
 import { charImg, sceneBg } from '../assets-manifest';
 import { audio } from '../core/audio';
+import { createLifecycleScope } from '../core/lifecycle';
+import { prefersReducedMotion } from '../core/motion';
 
 export function storyScene(mgr: SceneManager) {
   return (root: HTMLElement, params: SceneParams) => {
-    const lesson = getLesson(Number(params.lessonId));
+    const lesson = getLessonFromParam(params.lessonId);
     const scene = el('div', 'scene story-scene');
     scene.style.background = `linear-gradient(180deg, ${lesson.color}55 0%, #fff8e6 100%)`;
     // 차시별 배경 이미지 (public/assets/gameNN/bg.png가 있으면 자동 적용)
@@ -24,7 +26,7 @@ export function storyScene(mgr: SceneManager) {
     const back = button('🗺️', () => mgr.go('worldmap'), 'icon-btn', '월드맵으로 가기');
     hud.append(
       back,
-      el('div', 'hud-title', `${lesson.id}차시 · ${lesson.title}`),
+      el('h1', 'hud-title', `${lesson.id}차시 · ${lesson.title}`),
       el('div', 'spacer')
     );
     const skip = button('건너뛰기 ⏩', () => showMission(), 'btn ghost');
@@ -35,13 +37,20 @@ export function storyScene(mgr: SceneManager) {
 
     // 대화 상자
     const box = el('div', 'dialog-box');
+    box.setAttribute('role', 'button');
+    box.setAttribute('aria-label', '대화 계속하기');
+    box.tabIndex = 0;
     const speakerTag = el('div', 'speaker');
     const textEl = el('div', 'dialog-text');
+    textEl.setAttribute('role', 'status');
+    textEl.setAttribute('aria-live', 'polite');
+    textEl.setAttribute('aria-atomic', 'true');
     const hint = el('div', 'next-hint', '▼ 화면을 눌러 계속');
     box.append(speakerTag, textEl, hint);
     scene.appendChild(box);
 
     let idx = 0;
+    const lifecycle = createLifecycleScope();
     let typing: number | null = null;
     let missionShown = false;
 
@@ -57,13 +66,19 @@ export function storyScene(mgr: SceneManager) {
       const plain = line.text;
       let i = 0;
       textEl.innerHTML = '';
-      if (typing) clearInterval(typing);
-      typing = window.setInterval(() => {
+      lifecycle.clearInterval(typing);
+      typing = null;
+      if (prefersReducedMotion()) {
+        textEl.innerHTML = plain;
+        audio.pop();
+        return;
+      }
+      typing = lifecycle.setInterval(() => {
         i += 2;
         textEl.innerHTML = plain.slice(0, i);
         if (i >= plain.length) {
           textEl.innerHTML = plain;
-          if (typing) clearInterval(typing);
+          lifecycle.clearInterval(typing);
           typing = null;
         }
       }, 24);
@@ -75,7 +90,7 @@ export function storyScene(mgr: SceneManager) {
       const line = lesson.intro[idx];
       // 타이핑 중이면 즉시 전체 표시
       if (typing) {
-        clearInterval(typing);
+        lifecycle.clearInterval(typing);
         typing = null;
         textEl.innerHTML = line.text;
         return;
@@ -92,7 +107,7 @@ export function storyScene(mgr: SceneManager) {
       if (missionShown) return;
       missionShown = true;
       if (typing) {
-        clearInterval(typing);
+        lifecycle.clearInterval(typing);
         typing = null;
       }
       leftChar.classList.remove('talking', 'dim');
@@ -111,6 +126,7 @@ export function storyScene(mgr: SceneManager) {
       card.appendChild(go);
       overlay.appendChild(card);
       scene.appendChild(overlay);
+      go.focus({ preventScroll: true });
       audio.fanfare();
     }
 
@@ -122,13 +138,12 @@ export function storyScene(mgr: SceneManager) {
         advance();
       }
     };
-    window.addEventListener('keydown', onKey);
+    box.addEventListener('keydown', onKey);
     showLine();
 
     root.appendChild(scene);
     return () => {
-      window.removeEventListener('keydown', onKey);
-      if (typing) clearInterval(typing);
+      lifecycle.dispose();
     };
   };
 }

@@ -1,13 +1,16 @@
 import type { SceneManager, SceneParams } from '../core/scene';
 import { el, button } from '../ui/components';
-import { getLesson } from '../data/curriculum';
+import { getLessonFromParam } from '../data/curriculum';
 import { save } from '../core/save';
 import { audio } from '../core/audio';
+import { createLifecycleScope } from '../core/lifecycle';
+import { prefersReducedMotion } from '../core/motion';
 
 export function resultScene(mgr: SceneManager) {
   return (root: HTMLElement, params: SceneParams) => {
-    const lesson = getLesson(Number(params.lessonId));
-    const gameScore = Number(params.score ?? 0);
+    const lesson = getLessonFromParam(params.lessonId);
+    const gameScore = normalizeScore(params.score);
+    const lifecycle = createLifecycleScope();
     const scene = el('div', 'scene result-scene');
     root.appendChild(scene);
 
@@ -38,9 +41,10 @@ export function resultScene(mgr: SceneManager) {
       scene.innerHTML = '';
       const q = lesson.quiz[qIdx];
       const card = el('div', 'card quiz-card');
+      card.setAttribute('aria-labelledby', 'quiz-question');
       card.innerHTML = `
-        <div class="quiz-progress">확인 퀴즈 ${qIdx + 1} / ${lesson.quiz.length}</div>
-        <h3>Q${qIdx + 1}. ${q.q}</h3>`;
+        <div class="quiz-progress" role="status">확인 퀴즈 ${qIdx + 1} / ${lesson.quiz.length}</div>
+        <h3 id="quiz-question" tabindex="-1">Q${qIdx + 1}. ${q.q}</h3>`;
       const choices = el('div', 'quiz-choices');
       let answered = false;
 
@@ -56,6 +60,9 @@ export function resultScene(mgr: SceneManager) {
         btn.addEventListener('click', () => {
           if (answered) return;
           answered = true;
+          choices.querySelectorAll<HTMLButtonElement>('button').forEach((choice) => {
+            choice.disabled = true;
+          });
           const correct = origIdx === q.answer;
           if (correct) {
             quizCorrect++;
@@ -64,7 +71,8 @@ export function resultScene(mgr: SceneManager) {
           } else {
             btn.classList.add('wrong');
             const answerPos = order.indexOf(q.answer);
-            (choices.children[answerPos] as HTMLElement).classList.add('correct');
+            const correctChoice = choices.children.item(answerPos);
+            if (correctChoice instanceof HTMLElement) correctChoice.classList.add('correct');
             audio.bad();
           }
           const explain = el(
@@ -72,6 +80,8 @@ export function resultScene(mgr: SceneManager) {
             'quiz-explain',
             `${correct ? '🎉 <b>정답!</b>' : '😅 <b>아쉬워요!</b>'} ${q.explain}`
           );
+          explain.setAttribute('role', 'status');
+          explain.setAttribute('aria-live', 'polite');
           card.appendChild(explain);
           const next = button(
             qIdx < lesson.quiz.length - 1 ? '다음 문제 ▶' : '결과 보기 🏆',
@@ -84,19 +94,19 @@ export function resultScene(mgr: SceneManager) {
           );
           next.style.marginTop = '16px';
           card.appendChild(next);
+          next.focus({ preventScroll: true });
         });
         choices.appendChild(btn);
       });
       card.appendChild(choices);
       scene.appendChild(card);
+      card.querySelector<HTMLElement>('h3')?.focus({ preventScroll: true });
     }
 
     // ---------- 3단계: 별점 결과 ----------
     function showFinal() {
       // 별점: 클리어 1개 + 퀴즈 2개 이상 1개 + 퀴즈 만점&게임 70점 이상 1개
-      let stars = 1;
-      if (quizCorrect >= 2) stars++;
-      if (quizCorrect === lesson.quiz.length && gameScore >= 70) stars++;
+      const stars = calculateResultStars(gameScore, quizCorrect, lesson.quiz.length);
       save.report(lesson.id, stars, gameScore, quizCorrect);
 
       scene.innerHTML = '';
@@ -115,21 +125,28 @@ export function resultScene(mgr: SceneManager) {
       );
       card.appendChild(btns);
       scene.appendChild(card);
+      card.querySelector<HTMLElement>('h2')?.focus({ preventScroll: true });
       audio.fanfare();
 
       // 별 하나씩 등장
       const starEls = card.querySelectorAll<HTMLElement>('[data-star]');
+      if (prefersReducedMotion()) {
+        starEls.forEach((star) => {
+          star.style.opacity = '1';
+        });
+        return;
+      }
       starEls.forEach((s, i) => {
-        setTimeout(() => {
+        lifecycle.setTimeout(() => {
           s.style.opacity = '1';
-          s.animate(
+          lifecycle.trackAnimation(s.animate(
             [
               { transform: 'scale(0) rotate(-30deg)' },
               { transform: 'scale(1.4) rotate(10deg)' },
               { transform: 'scale(1)' }
             ],
             { duration: 350 }
-          );
+          ));
           if (i < stars) audio.star();
         }, 400 + i * 450);
       });
@@ -150,6 +167,23 @@ export function resultScene(mgr: SceneManager) {
     window.addEventListener('keydown', onKey);
     return () => {
       window.removeEventListener('keydown', onKey);
+      lifecycle.dispose();
     };
   };
+}
+
+function normalizeScore(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 0;
+  return Math.min(100, Math.max(0, Math.round(value)));
+}
+
+export function calculateResultStars(
+  gameScore: number,
+  quizCorrect: number,
+  quizCount: number
+): number {
+  let stars = 1;
+  if (quizCorrect >= 2) stars++;
+  if (quizCorrect === quizCount && gameScore >= 70) stars++;
+  return stars;
 }

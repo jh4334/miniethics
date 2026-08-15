@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import pkg from './package.json';
+import pkg from './package.json' with { type: 'json' };
 
 export default defineConfig({
   base: './',
@@ -11,7 +11,13 @@ export default defineConfig({
     assetsInlineLimit: 0
   },
   server: {
-    host: true,
-    port: 5173
+    host: '127.0.0.1',
+    port: 5173,
+    strictPort: true
+  },
+  preview: {
+    host: '127.0.0.1',
+    port: 4173,
+    strictPort: true
   }
 });

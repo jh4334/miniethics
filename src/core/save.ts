@@ -1,5 +1,7 @@
 // localStorage 기반 진행도 저장
 
+import { z } from 'zod';
+
 const KEY = 'miniethics-save-v1';
 
 export interface LessonRecord {
@@ -13,10 +15,20 @@ export interface SaveData {
   records: Record<number, LessonRecord>;
 }
 
+const LessonRecordSchema = z.object({
+  stars: z.number().finite(),
+  bestScore: z.number().finite(),
+  quizBest: z.number().finite(),
+  cleared: z.boolean()
+});
+
+const StoredSaveSchema = z.object({
+  records: z.record(z.string(), z.unknown())
+});
+
 function load(): SaveData {
   try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) return sanitize(JSON.parse(raw));
+    return parseSaveData(localStorage.getItem(KEY));
   } catch {
     /* 손상된 저장 데이터는 무시하고 새로 시작 */
   }
@@ -24,21 +36,28 @@ function load(): SaveData {
 }
 
 /** 외부 저장소에서 온 데이터를 신뢰하지 않고 형태·범위를 검증한다 */
-function sanitize(data: unknown): SaveData {
+export function parseSaveData(raw: string | null): SaveData {
   const out: SaveData = { records: {} };
-  if (!data || typeof data !== 'object') return out;
-  const records = (data as { records?: unknown }).records;
-  if (!records || typeof records !== 'object') return out;
-  for (const [k, v] of Object.entries(records as Record<string, unknown>)) {
-    const id = Number(k);
-    if (!Number.isInteger(id) || id < 1 || id > 12) continue;
-    if (!v || typeof v !== 'object') continue;
-    const r = v as Partial<LessonRecord>;
-    out.records[id] = {
-      stars: clampInt(r.stars, 0, 3),
-      bestScore: clampInt(r.bestScore, 0, 100),
-      quizBest: clampInt(r.quizBest, 0, 3),
-      cleared: r.cleared === true
+  if (!raw) return out;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return out;
+  }
+
+  const stored = StoredSaveSchema.safeParse(parsed);
+  if (!stored.success) return out;
+  for (const [key, value] of Object.entries(stored.data.records)) {
+    if (!/^(?:[1-9]|1[0-2])$/.test(key)) continue;
+    const record = LessonRecordSchema.safeParse(value);
+    if (!record.success) continue;
+    out.records[Number(key)] = {
+      stars: clampInt(record.data.stars, 0, 3),
+      bestScore: clampInt(record.data.bestScore, 0, 100),
+      quizBest: clampInt(record.data.quizBest, 0, 3),
+      cleared: record.data.cleared
     };
   }
   return out;
@@ -68,11 +87,12 @@ export const save = {
 
   /** 차시 결과 반영 (기존 기록보다 좋을 때만 갱신) */
   report(lessonId: number, stars: number, score: number, quizCorrect: number) {
+    if (!Number.isInteger(lessonId) || lessonId < 1 || lessonId > 12) return;
     const prev = save.record(lessonId);
     data.records[lessonId] = {
-      stars: Math.max(prev.stars, stars),
-      bestScore: Math.max(prev.bestScore, score),
-      quizBest: Math.max(prev.quizBest, quizCorrect),
+      stars: Math.max(prev.stars, clampInt(stars, 0, 3)),
+      bestScore: Math.max(prev.bestScore, clampInt(score, 0, 100)),
+      quizBest: Math.max(prev.quizBest, clampInt(quizCorrect, 0, 3)),
       cleared: true
     };
     persist();

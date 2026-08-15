@@ -30,6 +30,40 @@
   --radius: 22px;
   --font: 'SUIT Variable', 'SUIT', -apple-system, 'Apple SD Gothic Neo',
     'Noto Sans KR', sans-serif;
+  --minimum-target-size: 44px;
+  --game-white: #fff;
+  --game-overlay: rgba(44, 37, 71, 0.55);
+  --game-shadow-tint: rgba(58, 51, 82, 0.14);
+  --game-muted-surface: #f6f3ff;
+  --game-ai-surface: #f3f0ff;
+  --game-ai-border: #ded6ff;
+  --game-disabled: #cfc9de;
+  --game-disabled-shadow: #b3abc7;
+  --game-token-border: #d9b21a;
+  --game-empty: rgba(58, 51, 82, 0.06);
+  --game-empty-border: rgba(58, 51, 82, 0.12);
+  --game10-scene-top: #ffe4ec;
+  --game10-scene-mid: #fff2e0;
+  --game10-scene-bottom: #fffaf0;
+  --game10-evidence-start: #8a7ad6;
+  --game10-evidence-end: #b6a9e8;
+  --game10-road-sky: #e8f4ff;
+  --game10-road-horizon: #f7fbff;
+  --game10-road-ground: #efe7dd;
+  --game10-road-shadow: #e3d9cc;
+  --game04-scene-top: #ffe6f0;
+  --game04-scene-mid: #fff6fa;
+  --game04-scene-bottom: #f2ecff;
+  --game04-avatar: #f1edff;
+  --game04-marker: rgba(255, 255, 255, 0.92);
+  --game04-marker-fill: rgba(255, 255, 255, 0.26);
+  --game04-marker-pulse: rgba(255, 255, 255, 0.75);
+  --game04-marker-clear: rgba(255, 255, 255, 0);
+  --game04-found: rgba(255, 107, 107, 0.4);
+  --game04-checked: rgba(110, 110, 120, 0.9);
+  --game04-checked-fill: rgba(110, 110, 120, 0.4);
+  --game04-zoom-overlay: rgba(30, 25, 50, 0.55);
+  --game04-pop-shadow: rgba(0, 0, 0, 0.2);
 }
 
 * {
@@ -37,8 +71,6 @@
   padding: 0;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
 html,
@@ -66,9 +98,9 @@ img {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
+    animation: none !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -76,14 +108,69 @@ img {
 .btn:focus-visible,
 .icon-btn:focus-visible,
 .quiz-choice:focus-visible,
-.island:focus-visible {
+.island:focus-visible,
+.dialog-box:focus-visible,
+#stage:focus-visible,
+h1:focus-visible,
+h2:focus-visible,
+h3:focus-visible {
   outline: 4px solid var(--purple);
   outline-offset: 3px;
 }
 
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 2000;
+  transform: translateY(-160%);
+  background: var(--paper);
+  color: var(--ink);
+  border: 4px solid var(--purple-dark);
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+button,
+.island,
+.game-wrap {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.dialog-text,
+.summary-card,
+.quiz-card,
+.howto-desc,
+.map-toast,
+.error-card p {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.dialog-text,
+.summary-card,
+.quiz-card,
+.howto-desc,
+.map-toast,
+.error-card,
+.hud-title,
+.island-label {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-break: strict;
+}
+
 #viewport {
   position: fixed;
-  inset: 0;
+  inset: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0)
+    env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -93,11 +180,28 @@ img {
 #stage {
   width: 1280px;
   height: 800px;
+  flex: 0 0 1280px;
   position: relative;
   transform-origin: center center;
   background: linear-gradient(180deg, #b8e3ff 0%, #e6f6ff 60%, #fff9e8 100%);
   border-radius: 0;
   overflow: hidden;
+}
+
+.btn,
+.icon-btn,
+.quiz-choice,
+.dialog-box,
+.island {
+  min-height: var(--minimum-target-size);
+}
+
+.icon-btn {
+  min-width: var(--minimum-target-size);
+}
+
+.btn {
+  min-width: var(--minimum-target-size);
 }
 
 /* ---------- 전역 에러 복구 / 이탈 확인 오버레이 ---------- */
@@ -208,7 +312,7 @@ img {
 #rotate-hint {
   position: fixed;
   left: 50%;
-  bottom: 26px;
+  bottom: calc(26px + env(safe-area-inset-bottom, 0px));
   transform: translateX(-50%) translateY(90px);
   background: rgba(44, 37, 71, 0.92);
   color: #fff;
@@ -225,6 +329,48 @@ img {
 body.portrait #rotate-hint.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+body:not(.portrait) #rotate-hint {
+  display: none;
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --ink-soft: #4c4568;
+    --purple: #5835eb;
+    --purple-dark: #39229f;
+  }
+
+  .card,
+  .dialog-box,
+  .quiz-choice,
+  .hud-title,
+  .island-label {
+    border-color: var(--ink);
+    box-shadow: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .skip-link:focus-visible,
+  .btn:focus-visible,
+  .icon-btn:focus-visible,
+  .quiz-choice:focus-visible,
+  .island:focus-visible,
+  .dialog-box:focus-visible,
+  #stage:focus-visible,
+  h1:focus-visible,
+  h2:focus-visible,
+  h3:focus-visible,
+  .g10-modal .btn:focus {
+    forced-color-adjust: none;
+    outline: 4px solid CanvasText;
+  }
+
+  .cloud {
+    display: none;
+  }
 }
 
 /* ---------- 씬 공통 ---------- */
@@ -255,11 +401,9 @@ body.portrait #rotate-hint.show {
 }
 @keyframes scene-in {
   from {
-    opacity: 0;
     transform: scale(1.02);
   }
   to {
-    opacity: 1;
     transform: scale(1);
   }
 }
@@ -305,7 +449,19 @@ body.portrait #rotate-hint.show {
 }
 .btn.pink {
   background: var(--pink);
+  color: var(--ink);
   box-shadow: 0 6px 0 #e0608a;
+}
+
+.game-wrap,
+.result-scene {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-break: strict;
+}
+
+.summary-card li {
+  text-wrap: pretty;
 }
 .btn.pink:active {
   box-shadow: 0 1px 0 #e0608a;
@@ -525,6 +681,11 @@ body.portrait #rotate-hint.show {
   font-family: var(--font);
   z-index: 5;
 }
+.island:disabled {
+  color: inherit;
+  cursor: not-allowed;
+  opacity: 1;
+}
 .island .island-img {
   width: 118px;
   height: 118px;
@@ -695,6 +856,9 @@ body.portrait #rotate-hint.show {
   cursor: pointer;
   z-index: 10;
 }
+.dialog-box:focus-visible {
+  border-color: var(--purple-dark);
+}
 .dialog-box .speaker {
   position: absolute;
   top: -26px;
@@ -719,7 +883,7 @@ body.portrait #rotate-hint.show {
   right: 26px;
   bottom: 14px;
   font-size: 22px;
-  color: var(--purple);
+  color: var(--purple-dark);
   animation: hint-blink 1s ease-in-out infinite;
 }
 @keyframes hint-blink {
@@ -729,7 +893,7 @@ body.portrait #rotate-hint.show {
     transform: translateY(0);
   }
   50% {
-    opacity: 0.35;
+    opacity: 1;
     transform: translateY(4px);
   }
 }
