@@ -192,5 +192,23 @@ export function worldmapScene(mgr: SceneManager) {
     }
 
     root.appendChild(scene);
+
+    // ---------- 다음 차시 에셋 프리페치 (스토리 진입 시 배경·캐릭터 팝인 방지) ----------
+    const idle: (cb: () => void) => void =
+      'requestIdleCallback' in window
+        ? (cb) => (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(cb)
+        : (cb) => window.setTimeout(cb, 400);
+    idle(() => {
+      const nn = String(current.id).padStart(2, '0');
+      const urls = [
+        `./assets/game${nn}/bg.webp`,
+        `./assets/game${nn}/${current.chars.right}.webp`,
+        `./assets/common/eti.webp`
+      ];
+      for (const u of urls) {
+        const img = new Image();
+        img.src = u;
+      }
+    });
   };
 }
