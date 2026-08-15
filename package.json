@@ -1,7 +1,7 @@
 {
   "name": "miniethics",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "AI 윤리 미니게임 월드 - 초등 5~6학년 인공지능 윤리 12차시 교육용 게임 (PWA)",
   "type": "module",
   "scripts": {
