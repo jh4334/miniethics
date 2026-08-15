@@ -37,8 +37,6 @@
   padding: 0;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
 html,
@@ -66,9 +64,9 @@ img {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
+    animation: none !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -76,9 +74,50 @@ img {
 .btn:focus-visible,
 .icon-btn:focus-visible,
 .quiz-choice:focus-visible,
-.island:focus-visible {
+.island:focus-visible,
+.dialog-box:focus-visible,
+#stage:focus-visible,
+h1:focus-visible,
+h2:focus-visible,
+h3:focus-visible {
   outline: 4px solid var(--purple);
   outline-offset: 3px;
+}
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 2000;
+  transform: translateY(-160%);
+  background: var(--paper);
+  color: var(--ink);
+  border: 4px solid var(--purple-dark);
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+button,
+.island,
+.game-wrap {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.dialog-text,
+.summary-card,
+.quiz-card,
+.howto-desc,
+.map-toast,
+.error-card p {
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 #viewport {
@@ -255,11 +294,9 @@ body.portrait #rotate-hint.show {
 }
 @keyframes scene-in {
   from {
-    opacity: 0;
     transform: scale(1.02);
   }
   to {
-    opacity: 1;
     transform: scale(1);
   }
 }
@@ -525,6 +562,11 @@ body.portrait #rotate-hint.show {
   font-family: var(--font);
   z-index: 5;
 }
+.island:disabled {
+  color: inherit;
+  cursor: not-allowed;
+  opacity: 1;
+}
 .island .island-img {
   width: 118px;
   height: 118px;
@@ -695,6 +737,9 @@ body.portrait #rotate-hint.show {
   cursor: pointer;
   z-index: 10;
 }
+.dialog-box:focus-visible {
+  border-color: var(--purple-dark);
+}
 .dialog-box .speaker {
   position: absolute;
   top: -26px;
@@ -719,7 +764,7 @@ body.portrait #rotate-hint.show {
   right: 26px;
   bottom: 14px;
   font-size: 22px;
-  color: var(--purple);
+  color: var(--purple-dark);
   animation: hint-blink 1s ease-in-out infinite;
 }
 @keyframes hint-blink {
@@ -729,7 +774,7 @@ body.portrait #rotate-hint.show {
     transform: translateY(0);
   }
   50% {
-    opacity: 0.35;
+    opacity: 1;
     transform: translateY(4px);
   }
 }

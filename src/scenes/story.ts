@@ -4,6 +4,7 @@ import { getLessonFromParam } from '../data/curriculum';
 import { charImg, sceneBg } from '../assets-manifest';
 import { audio } from '../core/audio';
 import { createLifecycleScope } from '../core/lifecycle';
+import { prefersReducedMotion } from '../core/motion';
 
 export function storyScene(mgr: SceneManager) {
   return (root: HTMLElement, params: SceneParams) => {
@@ -25,7 +26,7 @@ export function storyScene(mgr: SceneManager) {
     const back = button('🗺️', () => mgr.go('worldmap'), 'icon-btn', '월드맵으로 가기');
     hud.append(
       back,
-      el('div', 'hud-title', `${lesson.id}차시 · ${lesson.title}`),
+      el('h1', 'hud-title', `${lesson.id}차시 · ${lesson.title}`),
       el('div', 'spacer')
     );
     const skip = button('건너뛰기 ⏩', () => showMission(), 'btn ghost');
@@ -36,8 +37,14 @@ export function storyScene(mgr: SceneManager) {
 
     // 대화 상자
     const box = el('div', 'dialog-box');
+    box.setAttribute('role', 'button');
+    box.setAttribute('aria-label', '대화 계속하기');
+    box.tabIndex = 0;
     const speakerTag = el('div', 'speaker');
     const textEl = el('div', 'dialog-text');
+    textEl.setAttribute('role', 'status');
+    textEl.setAttribute('aria-live', 'polite');
+    textEl.setAttribute('aria-atomic', 'true');
     const hint = el('div', 'next-hint', '▼ 화면을 눌러 계속');
     box.append(speakerTag, textEl, hint);
     scene.appendChild(box);
@@ -60,6 +67,12 @@ export function storyScene(mgr: SceneManager) {
       let i = 0;
       textEl.innerHTML = '';
       lifecycle.clearInterval(typing);
+      typing = null;
+      if (prefersReducedMotion()) {
+        textEl.innerHTML = plain;
+        audio.pop();
+        return;
+      }
       typing = lifecycle.setInterval(() => {
         i += 2;
         textEl.innerHTML = plain.slice(0, i);
@@ -113,6 +126,7 @@ export function storyScene(mgr: SceneManager) {
       card.appendChild(go);
       overlay.appendChild(card);
       scene.appendChild(overlay);
+      go.focus({ preventScroll: true });
       audio.fanfare();
     }
 
@@ -124,12 +138,11 @@ export function storyScene(mgr: SceneManager) {
         advance();
       }
     };
-    window.addEventListener('keydown', onKey);
+    box.addEventListener('keydown', onKey);
     showLine();
 
     root.appendChild(scene);
     return () => {
-      window.removeEventListener('keydown', onKey);
       lifecycle.dispose();
     };
   };

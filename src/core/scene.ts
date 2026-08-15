@@ -24,6 +24,7 @@ export class SceneManager {
   go(id: SceneId, params: SceneParams = {}) {
     const factory = this.scenes.get(id);
     if (!factory) throw new Error(`unknown scene: ${id}`);
+    const focusOnMount = this.current !== null;
     const previousCleanup = this.cleanup;
     this.cleanup = undefined;
     try {
@@ -31,6 +32,7 @@ export class SceneManager {
       this.root.replaceChildren();
       this.cleanup = factory(this.root, params);
       this.current = id;
+      if (focusOnMount) focusSceneHeading(this.root);
       this.onNavigate?.(id);
     } catch (error) {
       this.cleanup = undefined;
@@ -40,4 +42,11 @@ export class SceneManager {
       this.onError(id, error);
     }
   }
+}
+
+function focusSceneHeading(root: HTMLElement): void {
+  const heading = root.querySelector<HTMLElement>('h1, h2');
+  if (!heading) return;
+  heading.tabIndex = -1;
+  heading.focus({ preventScroll: true });
 }

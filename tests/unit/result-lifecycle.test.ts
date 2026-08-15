@@ -106,6 +106,7 @@ describe('result scene lifecycle', () => {
 
     for (let index = 0; index < 20; index++) {
       manager.go('story', { lessonId: 1 });
+      vi.advanceTimersByTime(0);
       expect(vi.getTimerCount()).toBe(1);
       manager.go('worldmap');
       expect(vi.getTimerCount()).toBe(0);
