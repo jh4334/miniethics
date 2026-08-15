@@ -3,11 +3,13 @@ import { el, button } from '../ui/components';
 import { getLessonFromParam } from '../data/curriculum';
 import { save } from '../core/save';
 import { audio } from '../core/audio';
+import { createLifecycleScope } from '../core/lifecycle';
 
 export function resultScene(mgr: SceneManager) {
   return (root: HTMLElement, params: SceneParams) => {
     const lesson = getLessonFromParam(params.lessonId);
     const gameScore = normalizeScore(params.score);
+    const lifecycle = createLifecycleScope();
     const scene = el('div', 'scene result-scene');
     root.appendChild(scene);
 
@@ -120,16 +122,16 @@ export function resultScene(mgr: SceneManager) {
       // 별 하나씩 등장
       const starEls = card.querySelectorAll<HTMLElement>('[data-star]');
       starEls.forEach((s, i) => {
-        setTimeout(() => {
+        lifecycle.setTimeout(() => {
           s.style.opacity = '1';
-          s.animate(
+          lifecycle.trackAnimation(s.animate(
             [
               { transform: 'scale(0) rotate(-30deg)' },
               { transform: 'scale(1.4) rotate(10deg)' },
               { transform: 'scale(1)' }
             ],
             { duration: 350 }
-          );
+          ));
           if (i < stars) audio.star();
         }, 400 + i * 450);
       });
@@ -150,6 +152,7 @@ export function resultScene(mgr: SceneManager) {
     window.addEventListener('keydown', onKey);
     return () => {
       window.removeEventListener('keydown', onKey);
+      lifecycle.dispose();
     };
   };
 }

@@ -3,6 +3,7 @@ import { el, button } from '../ui/components';
 import { getLessonFromParam } from '../data/curriculum';
 import { charImg, sceneBg } from '../assets-manifest';
 import { audio } from '../core/audio';
+import { createLifecycleScope } from '../core/lifecycle';
 
 export function storyScene(mgr: SceneManager) {
   return (root: HTMLElement, params: SceneParams) => {
@@ -42,6 +43,7 @@ export function storyScene(mgr: SceneManager) {
     scene.appendChild(box);
 
     let idx = 0;
+    const lifecycle = createLifecycleScope();
     let typing: number | null = null;
     let missionShown = false;
 
@@ -57,13 +59,13 @@ export function storyScene(mgr: SceneManager) {
       const plain = line.text;
       let i = 0;
       textEl.innerHTML = '';
-      if (typing) clearInterval(typing);
-      typing = window.setInterval(() => {
+      lifecycle.clearInterval(typing);
+      typing = lifecycle.setInterval(() => {
         i += 2;
         textEl.innerHTML = plain.slice(0, i);
         if (i >= plain.length) {
           textEl.innerHTML = plain;
-          if (typing) clearInterval(typing);
+          lifecycle.clearInterval(typing);
           typing = null;
         }
       }, 24);
@@ -75,7 +77,7 @@ export function storyScene(mgr: SceneManager) {
       const line = lesson.intro[idx];
       // 타이핑 중이면 즉시 전체 표시
       if (typing) {
-        clearInterval(typing);
+        lifecycle.clearInterval(typing);
         typing = null;
         textEl.innerHTML = line.text;
         return;
@@ -92,7 +94,7 @@ export function storyScene(mgr: SceneManager) {
       if (missionShown) return;
       missionShown = true;
       if (typing) {
-        clearInterval(typing);
+        lifecycle.clearInterval(typing);
         typing = null;
       }
       leftChar.classList.remove('talking', 'dim');
@@ -128,7 +130,7 @@ export function storyScene(mgr: SceneManager) {
     root.appendChild(scene);
     return () => {
       window.removeEventListener('keydown', onKey);
-      if (typing) clearInterval(typing);
+      lifecycle.dispose();
     };
   };
 }
