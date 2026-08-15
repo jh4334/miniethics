@@ -1,10 +1,4 @@
-import type { CaseData } from './model';
-import { CASE_1 } from './case-1';
-import { CASE_2 } from './case-2';
-import { CASE_3 } from './case-3';
-
 export const PIECES = 6;
-export const CASES: CaseData[] = [CASE_1, CASE_2, CASE_3];
 
 export const AI_LINES = [
   "어…? 조각이 자꾸 미끄러져. 나는 책임을 '받을' 수가 없나 봐…",

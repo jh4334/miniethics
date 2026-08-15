@@ -1,4 +1,4 @@
-export const GAME04_CSS = `
+export const GAME04_STYLES = `
 .g04-scene { background: linear-gradient(180deg,#ffe6f0 0%,#fff6fa 55%,#f2ecff 100%); }
 .g04-lens {
   font-size: 24px; font-weight: 800; background: rgba(255,255,255,0.92);
@@ -28,11 +28,15 @@ export const GAME04_CSS = `
   text-align: center;
 }
 .g04-marker {
-  position: absolute; width: 72px; height: 72px; transform: translate(-50%,-50%);
+  position: absolute; width: max(72px,var(--minimum-target-size)); height: max(72px,var(--minimum-target-size)); transform: translate(-50%,-50%);
   border-radius: 50%; border: 4px solid rgba(255,255,255,0.92);
   background: rgba(255,255,255,0.26); color: #fff; font-size: 32px; padding: 0;
   display: flex; align-items: center; justify-content: center; cursor: pointer;
   font-family: var(--font); z-index: 6; animation: g04-twinkle 1.5s ease-in-out infinite;
+}
+.g04-marker:focus-visible {
+  animation:none; outline:8px solid var(--purple-dark); outline-offset:4px;
+  box-shadow:0 0 0 5px #fff;
 }
 @keyframes g04-twinkle {
   0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.75); }
@@ -93,7 +97,7 @@ export const GAME04_CSS = `
 .g04-line.miss { color: var(--red); font-weight: 700; opacity: 0.85; }
 .g04-empty { font-size: 22px; color: var(--ink-soft); line-height: 1.4; }
 .g04-verdict { display: flex; gap: 14px; margin-top: 14px; }
-.g04-verdict .btn { flex: 1; min-height: 76px; font-size: 26px; }
+.g04-verdict .btn { flex: 1; min-height: max(76px,var(--minimum-target-size)); font-size: 26px; }
 /* 사건 전환 직후 오탭 방지: 잠깐 입력을 막는다 (모양은 그대로) */
 .g04-verdict.g04-lock { pointer-events: none; }
 .g04-answer { font-size: 30px; font-weight: 800; text-align: center; margin: 6px 0 10px; }
@@ -103,5 +107,5 @@ export const GAME04_CSS = `
   flex: 1; background: #fff; border-radius: 14px; padding: 14px 16px;
   font-size: 23px; line-height: 1.55; color: var(--ink); overflow-y: auto; min-height: 0;
 }
-.g04-next { margin-top: 14px; min-height: 76px; font-size: 26px; width: 100%; }
+.g04-next { margin-top: 14px; min-height: max(76px,var(--minimum-target-size)); font-size: 26px; width: 100%; }
 `;

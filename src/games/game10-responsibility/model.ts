@@ -11,7 +11,6 @@ export interface Actor {
   at?: number;
   sound?: 'bad' | 'pop';
 }
-
 export interface Evidence {
   icon: string;
   title: string;

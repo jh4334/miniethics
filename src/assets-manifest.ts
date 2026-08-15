@@ -1,5 +1,4 @@
-// 에셋 목록 - 같은 폴더에 같은 이름의 PNG를 넣으면 자동으로 PNG를 사용합니다.
-// (PNG가 없으면 기본 SVG 플레이스홀더 사용. 자세한 방법은 docs/asset-guide.md)
+// 완성된 프로덕션 에셋 목록. 선택적 WebP 최적화본 뒤 PNG, 캐릭터는 SVG 폴백까지 사용합니다.
 
 export const CHARACTER_ASSETS = {
   /** 주인공 요원 (권장 1024x1024, 투명 배경) */

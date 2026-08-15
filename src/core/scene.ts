@@ -9,6 +9,7 @@ export type SceneFactory = (root: HTMLElement, params: SceneParams) => void | ((
 export class SceneManager {
   private scenes = new Map<SceneId, SceneFactory>();
   private cleanup: void | (() => void) = undefined;
+  private transition = 0;
   /** 현재 표시 중인 씬 (뒤로가기 처리 등에 사용) */
   current: SceneId | null = null;
   /** 씬 전환 직후 호출되는 훅 */
@@ -22,6 +23,7 @@ export class SceneManager {
   }
 
   go(id: SceneId, params: SceneParams = {}) {
+    const transition = ++this.transition;
     const factory = this.scenes.get(id);
     if (!factory) throw new Error(`unknown scene: ${id}`);
     const focusOnMount = this.current !== null;
@@ -30,11 +32,17 @@ export class SceneManager {
     try {
       if (previousCleanup) previousCleanup();
       this.root.replaceChildren();
-      this.cleanup = factory(this.root, params);
+      const nextCleanup = factory(this.root, params);
+      if (transition !== this.transition) {
+        nextCleanup?.();
+        return;
+      }
+      this.cleanup = nextCleanup;
       this.current = id;
       if (focusOnMount) focusSceneHeading(this.root);
       this.onNavigate?.(id);
     } catch (error) {
+      if (transition !== this.transition) return;
       this.cleanup = undefined;
       this.current = null;
       this.root.replaceChildren();

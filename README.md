@@ -27,7 +27,9 @@ npm run dev        # 개발 서버 (http://localhost:5173)
 npm run dev:lan    # 신뢰할 수 있는 교실 네트워크에만 공개
 npm run build      # 배포용 빌드 → dist/
 npm run preview    # 빌드 결과 미리보기
+npm test           # 단위·계약 테스트
 npm run test:unit  # 단위·계약 테스트
+npm run test:contracts # 커리큘럼·에셋·모듈 계약
 npm run test:e2e   # 실제 Chromium 학습 흐름 테스트
 npm run check:ci   # 배포 전 전체 품질 게이트
 ```
@@ -57,7 +59,14 @@ npm run check:ci   # 배포 전 전체 품질 게이트
 
 1. `src/games/gameXX-이름.ts` 생성 — `MiniGame` 인터페이스(`mount`/`finish`) 구현
 2. `src/games/registry.ts`에 등록
-3. `src/data/curriculum.ts`에서 해당 차시 `playable: true`로 바꾸고 스토리·퀴즈 채우기
+3. 1~3차시는 `src/data/curriculum.ts`, 4~12차시는 `src/data/lessons/lessonXX.ts`에 스토리·퀴즈 작성
+4. `npm run check:ci`로 단위·계약·Chromium·빌드를 모두 검증
+
+Game 04와 Game 10은 공개 진입 파일이 레지스트리 계약만 유지하고, 구현은 각각
+`src/games/game04-deepfake/`, `src/games/game10-responsibility/` 아래에 나뉩니다.
+controller는 상태·타이머·정리를, view/phase 모듈은 DOM 표현을, model/cases/copy는
+부작용 없는 타입·콘텐츠를 소유합니다. 게임 수정 PR에서는 `public/assets/**`를 함께
+고치지 말고 에셋 작업을 별도 PR로 분리합니다.
 
 ## 기술 스택
 

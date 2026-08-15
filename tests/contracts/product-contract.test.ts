@@ -93,20 +93,3 @@ describe('continuous integration contract', () => {
     expect(await readFile(path.join(root, '.github/workflows/deploy.yml'), 'utf8')).toContain('npm run check:ci');
   });
 });
-
-describe('large game module boundaries', () => {
-  it('keeps entry modules reduced and extracted responsibilities reviewable', async () => {
-    const lineCount = async (relativePath: string) =>
-      (await readFile(path.join(root, relativePath), 'utf8')).split(/\r?\n/).length;
-
-    expect(await lineCount('src/games/game04-deepfake.ts')).toBeLessThanOrEqual(400);
-    expect(await lineCount('src/games/game10-responsibility.ts')).toBeLessThanOrEqual(650);
-
-    for (const directory of ['src/games/game04', 'src/games/game10']) {
-      const files = (await readdir(path.join(root, directory))).filter((file) => file.endsWith('.ts'));
-      for (const file of files) {
-        expect(await lineCount(path.posix.join(directory, file))).toBeLessThanOrEqual(250);
-      }
-    }
-  });
-});

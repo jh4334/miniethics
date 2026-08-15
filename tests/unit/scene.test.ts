@@ -51,4 +51,19 @@ describe('SceneManager', () => {
     expect(titleCleanup).toHaveBeenCalledTimes(1);
     expect(mapCleanup).toHaveBeenCalledTimes(1);
   });
+
+  it('keeps the nested destination current when a scene redirects during mount', () => {
+    const manager = new SceneManager(stageRoot());
+    manager.register('soon', (root) => {
+      root.textContent = '준비 중';
+    });
+    manager.register('game', () => {
+      manager.go('soon');
+    });
+
+    manager.go('game');
+
+    expect(manager.current).toBe('soon');
+    expect(stageRoot().textContent).toBe('준비 중');
+  });
 });

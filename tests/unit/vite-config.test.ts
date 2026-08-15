@@ -1,15 +1,15 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import viteConfig from '../../vite.config';
 
 const packageJson: unknown = JSON.parse(readFileSync('package.json', 'utf8'));
 const packageLock: unknown = JSON.parse(readFileSync('package-lock.json', 'utf8'));
 const deployWorkflow = readFileSync('.github/workflows/deploy.yml', 'utf8');
-const viteConfig = readFileSync('vite.config.ts', 'utf8');
 
 describe('development toolchain security contract', () => {
   it('binds development and preview servers to loopback by default', () => {
-    expect(viteConfig).toMatch(/server:\s*{[^}]*host:\s*'127\.0\.0\.1'[^}]*strictPort:\s*true/s);
-    expect(viteConfig).toMatch(/preview:\s*{[^}]*host:\s*'127\.0\.0\.1'[^}]*strictPort:\s*true/s);
+    expect(viteConfig.server).toMatchObject({ host: '127.0.0.1', strictPort: true });
+    expect(viteConfig.preview).toMatchObject({ host: '127.0.0.1', strictPort: true });
   });
 
   it('provides an explicit trusted-network LAN command', () => {

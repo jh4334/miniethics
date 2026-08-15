@@ -411,7 +411,19 @@ body:not(.portrait) #rotate-hint {
 }
 .btn.pink {
   background: var(--pink);
+  color: var(--ink);
   box-shadow: 0 6px 0 #e0608a;
+}
+
+.game-wrap,
+.result-scene {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-break: strict;
+}
+
+.summary-card li {
+  text-wrap: pretty;
 }
 .btn.pink:active {
   box-shadow: 0 1px 0 #e0608a;

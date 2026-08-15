@@ -1,4 +1,4 @@
-export const GAME10_CSS = `
+export const GAME10_STYLES = `
 /* 상단바에서 점수를 오른쪽 끝으로 밀어내는 여백 (타이머 바 대신) */
 .g10-spacer { flex:1; }
 
@@ -40,11 +40,16 @@ export const GAME10_CSS = `
 .g10-desc { margin-top:14px; font-size:24px; line-height:1.55; font-weight:700; color:var(--ink);
   background:#fff; border-radius:16px; padding:14px 16px; min-height:96px; }
 .g10-center { text-align:center; margin-top:16px; }
-.g10-center .btn { min-height:76px; font-size:28px; }
+.g10-center .btn { min-height:max(76px,var(--minimum-target-size)); font-size:28px; }
 
 /* B: 증거 조사 */
 .g10-evrow { display:flex; gap:18px; justify-content:center; }
-.g10-ev { width:290px; height:380px; perspective:900px; cursor:pointer; }
+.g10-ev { width:290px; height:380px; perspective:900px; cursor:pointer;
+  border:0; padding:0; background:none; color:inherit; font:inherit; }
+.g10-ev:focus-visible, .g10-def:focus-visible {
+  outline:8px solid var(--purple-dark); outline-offset:4px;
+  box-shadow:0 0 0 5px #fff, 0 0 0 13px var(--purple-dark);
+}
 .g10-ev-inner { position:relative; width:100%; height:100%; transform-style:preserve-3d;
   transition:transform .5s ease; }
 .g10-ev.flip .g10-ev-inner { transform:rotateY(180deg); }
@@ -58,11 +63,11 @@ export const GAME10_CSS = `
 .g10-face.back .g10-ico { font-size:64px; }
 .g10-face.back .g10-t { font-size:25px; font-weight:800; margin:8px 0 8px; }
 .g10-face.back .g10-d { font-size:21px; line-height:1.5; color:var(--ink-soft); font-weight:700; }
-.g10-face.back .g10-more { margin-top:10px; font-size:18px; font-weight:800; color:var(--purple); }
+.g10-face.back .g10-more { margin-top:10px; font-size:18px; font-weight:800; color:var(--purple-dark); }
 .g10-ev:active .g10-ev-inner { filter:brightness(.96); }
 .g10-gate { margin-top:18px; text-align:center; }
-.g10-gate .btn { min-height:76px; font-size:28px; }
-.g10-off { background:#cfc9de; color:#fff; box-shadow:0 6px 0 #b3abc7; }
+.g10-gate .btn { min-height:max(76px,var(--minimum-target-size)); font-size:28px; }
+.g10-off { background:#cfc9de; color:var(--ink); box-shadow:0 6px 0 #b3abc7; }
 .g10-hint { margin-top:10px; font-size:21px; font-weight:800; color:var(--ink-soft); }
 
 /* 확대 모달 */
@@ -80,7 +85,7 @@ export const GAME10_CSS = `
 .g10-defrow { display:flex; gap:14px; justify-content:center; }
 .g10-def { flex:1; background:#fff; border-radius:20px; box-shadow:var(--shadow); padding:12px 8px 10px;
   text-align:center; cursor:pointer; border:5px solid transparent;
-  transition:transform .1s ease, border-color .2s ease; }
+  transition:transform .1s ease, border-color .2s ease; color:inherit; font:inherit; }
 .g10-def:active { transform:translateY(4px); }
 .g10-def.hot { border-color:var(--yellow); }
 .g10-def.ai { background:#f3f0ff; border-color:#ded6ff; cursor:pointer; }
