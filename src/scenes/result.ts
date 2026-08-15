@@ -40,19 +40,27 @@ export function resultScene(mgr: SceneManager) {
       const choices = el('div', 'quiz-choices');
       let answered = false;
 
-      q.choices.forEach((c, i) => {
-        const btn = el('button', 'quiz-choice', `${['①', '②', '③', '④'][i]} ${c}`);
+      // 선택지 순서를 매번 섞는다 (번호로 정답을 외우거나 공유하는 것 방지)
+      const order = q.choices.map((_, i) => i);
+      for (let i = order.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [order[i], order[j]] = [order[j], order[i]];
+      }
+
+      order.forEach((origIdx, i) => {
+        const btn = el('button', 'quiz-choice', `${['①', '②', '③', '④'][i]} ${q.choices[origIdx]}`);
         btn.addEventListener('click', () => {
           if (answered) return;
           answered = true;
-          const correct = i === q.answer;
+          const correct = origIdx === q.answer;
           if (correct) {
             quizCorrect++;
             btn.classList.add('correct');
             audio.good();
           } else {
             btn.classList.add('wrong');
-            (choices.children[q.answer] as HTMLElement).classList.add('correct');
+            const answerPos = order.indexOf(q.answer);
+            (choices.children[answerPos] as HTMLElement).classList.add('correct');
             audio.bad();
           }
           const explain = el(
