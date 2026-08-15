@@ -57,6 +57,12 @@ mgr.onNavigate = (id) => {
   if (!popNav && id !== 'title') history.pushState({ scene: id }, '');
 };
 window.addEventListener('popstate', () => {
+  // 게임 중 뒤로가기는 즉시 이동하지 않고, 게임 씬의 이탈 확인 대화상자로 위임한다
+  if (mgr.current === 'game') {
+    history.pushState({ scene: 'game' }, ''); // 소비된 히스토리 엔트리 복원
+    window.dispatchEvent(new CustomEvent('miniethics-back'));
+    return;
+  }
   const parent = mgr.current ? PARENT[mgr.current] : null;
   if (!parent) return; // 타이틀에서는 브라우저 기본 동작(이탈) 허용
   popNav = true;
