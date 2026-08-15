@@ -844,6 +844,15 @@ body.portrait #rotate-hint.show {
 .result-final .score-line {
   font-size: 24px;
   color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.result-final .star-guide {
+  font-size: 17px;
+  color: var(--ink-soft);
+  background: var(--cream);
+  border-radius: 999px;
+  padding: 8px 18px;
+  display: inline-block;
   margin-bottom: 20px;
 }
 .result-btns {

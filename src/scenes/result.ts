@@ -11,6 +11,10 @@ export function resultScene(mgr: SceneManager) {
     const scene = el('div', 'scene result-scene');
     root.appendChild(scene);
 
+    // 게임을 끝낸 시점에 즉시 최소 기록(별1)을 저장한다.
+    // 퀴즈 도중 이탈·새로고침해도 클리어가 사라지지 않고, 퀴즈 완료 시 상향 갱신된다.
+    save.report(lesson.id, 1, gameScore, 0);
+
     // ---------- 1단계: 배움 정리 카드 ----------
     function showSummary() {
       scene.innerHTML = '';
@@ -102,7 +106,8 @@ export function resultScene(mgr: SceneManager) {
       card.innerHTML = `
         <h2>${stars >= 3 ? '완벽해요! 🎊' : stars === 2 ? '참 잘했어요! 🎉' : '클리어! 👏'}</h2>
         <div class="big-stars">${[0, 1, 2].map(starSpan).join('')}</div>
-        <div class="score-line">게임 점수 ${gameScore}점 · 퀴즈 ${quizCorrect} / ${lesson.quiz.length} 맞힘</div>`;
+        <div class="score-line">게임 점수 ${gameScore}점 · 퀴즈 ${quizCorrect} / ${lesson.quiz.length} 맞힘</div>
+        <div class="star-guide">⭐ 클리어 &nbsp;·&nbsp; ⭐⭐ 퀴즈 2개 이상 &nbsp;·&nbsp; ⭐⭐⭐ 퀴즈 다 맞히고 게임 70점!</div>`;
       const btns = el('div', 'result-btns');
       btns.append(
         button('🗺️ 월드맵으로', () => mgr.go('worldmap'), 'btn mint'),
