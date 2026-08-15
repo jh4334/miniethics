@@ -58,6 +58,13 @@ export function worldmapScene(mgr: SceneManager) {
       isl.addEventListener('click', () => {
         if (!unlocked) {
           audio.bad();
+          // 왜 잠겨 있는지 + 무엇을 하면 열리는지 안내
+          const prev = LESSONS.find((x) => x.id === lesson.id - 1);
+          showMapToast(
+            prev
+              ? `🔒 먼저 ${prev.id}차시 「${prev.islandName}」을 클리어하면 열려요!`
+              : '🔒 아직 잠겨 있어요!'
+          );
           isl.animate(
             [
               { transform: 'translate(-50%,-50%) rotate(0deg)' },
@@ -85,6 +92,20 @@ export function worldmapScene(mgr: SceneManager) {
       hero.style.left = `${current.x}%`;
       hero.style.top = `calc(${current.y}% - 52px)`;
       scene.appendChild(hero);
+    }
+
+    // ---------- 잠긴 섬 안내 토스트 ----------
+    let toastTimer: number | null = null;
+    function showMapToast(msg: string) {
+      let toast = scene.querySelector<HTMLElement>('.map-toast');
+      if (!toast) {
+        toast = el('div', 'map-toast');
+        scene.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => toast!.classList.remove('show'), 2400);
     }
 
     // 상단 HUD
