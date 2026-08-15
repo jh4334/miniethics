@@ -1,6 +1,7 @@
 name: Quality gate
 
 on:
+  push:
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -13,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22.12.0

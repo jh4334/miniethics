@@ -1,5 +1,7 @@
 // localStorage 기반 진행도 저장
 
+import { z } from 'zod';
+
 const KEY = 'miniethics-save-v1';
 
 export interface LessonRecord {
@@ -12,6 +14,17 @@ export interface LessonRecord {
 export interface SaveData {
   records: Record<number, LessonRecord>;
 }
+
+const LessonRecordSchema = z.object({
+  stars: z.number().finite(),
+  bestScore: z.number().finite(),
+  quizBest: z.number().finite(),
+  cleared: z.boolean()
+});
+
+const StoredSaveSchema = z.object({
+  records: z.record(z.string(), z.unknown())
+});
 
 function load(): SaveData {
   try {
@@ -34,40 +47,20 @@ export function parseSaveData(raw: string | null): SaveData {
     return out;
   }
 
-  if (!isRecord(parsed) || !isRecord(parsed.records)) return out;
-  for (const [key, value] of Object.entries(parsed.records)) {
+  const stored = StoredSaveSchema.safeParse(parsed);
+  if (!stored.success) return out;
+  for (const [key, value] of Object.entries(stored.data.records)) {
     if (!/^(?:[1-9]|1[0-2])$/.test(key)) continue;
-    const record = parseLessonRecord(value);
-    if (!record) continue;
-    out.records[Number(key)] = record;
+    const record = LessonRecordSchema.safeParse(value);
+    if (!record.success) continue;
+    out.records[Number(key)] = {
+      stars: clampInt(record.data.stars, 0, 3),
+      bestScore: clampInt(record.data.bestScore, 0, 100),
+      quizBest: clampInt(record.data.quizBest, 0, 3),
+      cleared: record.data.cleared
+    };
   }
   return out;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function parseLessonRecord(value: unknown): LessonRecord | null {
-  if (!isRecord(value)) return null;
-  if (
-    typeof value.stars !== 'number' ||
-    typeof value.bestScore !== 'number' ||
-    typeof value.quizBest !== 'number' ||
-    typeof value.cleared !== 'boolean' ||
-    !Number.isFinite(value.stars) ||
-    !Number.isFinite(value.bestScore) ||
-    !Number.isFinite(value.quizBest)
-  ) {
-    return null;
-  }
-
-  return {
-    stars: clampInt(value.stars, 0, 3),
-    bestScore: clampInt(value.bestScore, 0, 100),
-    quizBest: clampInt(value.quizBest, 0, 3),
-    cleared: value.cleared
-  };
 }
 
 function clampInt(v: unknown, min: number, max: number): number {

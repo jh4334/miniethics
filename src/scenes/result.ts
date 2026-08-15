@@ -106,9 +106,7 @@ export function resultScene(mgr: SceneManager) {
     // ---------- 3단계: 별점 결과 ----------
     function showFinal() {
       // 별점: 클리어 1개 + 퀴즈 2개 이상 1개 + 퀴즈 만점&게임 70점 이상 1개
-      let stars = 1;
-      if (quizCorrect >= 2) stars++;
-      if (quizCorrect === lesson.quiz.length && gameScore >= 70) stars++;
+      const stars = calculateResultStars(gameScore, quizCorrect, lesson.quiz.length);
       save.report(lesson.id, stars, gameScore, quizCorrect);
 
       scene.innerHTML = '';
@@ -177,4 +175,15 @@ export function resultScene(mgr: SceneManager) {
 function normalizeScore(value: unknown): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) return 0;
   return Math.min(100, Math.max(0, Math.round(value)));
+}
+
+export function calculateResultStars(
+  gameScore: number,
+  quizCorrect: number,
+  quizCount: number
+): number {
+  let stars = 1;
+  if (quizCorrect >= 2) stars++;
+  if (quizCorrect === quizCount && gameScore >= 70) stars++;
+  return stars;
 }

@@ -31,6 +31,39 @@
   --font: 'SUIT Variable', 'SUIT', -apple-system, 'Apple SD Gothic Neo',
     'Noto Sans KR', sans-serif;
   --minimum-target-size: 44px;
+  --game-white: #fff;
+  --game-overlay: rgba(44, 37, 71, 0.55);
+  --game-shadow-tint: rgba(58, 51, 82, 0.14);
+  --game-muted-surface: #f6f3ff;
+  --game-ai-surface: #f3f0ff;
+  --game-ai-border: #ded6ff;
+  --game-disabled: #cfc9de;
+  --game-disabled-shadow: #b3abc7;
+  --game-token-border: #d9b21a;
+  --game-empty: rgba(58, 51, 82, 0.06);
+  --game-empty-border: rgba(58, 51, 82, 0.12);
+  --game10-scene-top: #ffe4ec;
+  --game10-scene-mid: #fff2e0;
+  --game10-scene-bottom: #fffaf0;
+  --game10-evidence-start: #8a7ad6;
+  --game10-evidence-end: #b6a9e8;
+  --game10-road-sky: #e8f4ff;
+  --game10-road-horizon: #f7fbff;
+  --game10-road-ground: #efe7dd;
+  --game10-road-shadow: #e3d9cc;
+  --game04-scene-top: #ffe6f0;
+  --game04-scene-mid: #fff6fa;
+  --game04-scene-bottom: #f2ecff;
+  --game04-avatar: #f1edff;
+  --game04-marker: rgba(255, 255, 255, 0.92);
+  --game04-marker-fill: rgba(255, 255, 255, 0.26);
+  --game04-marker-pulse: rgba(255, 255, 255, 0.75);
+  --game04-marker-clear: rgba(255, 255, 255, 0);
+  --game04-found: rgba(255, 107, 107, 0.4);
+  --game04-checked: rgba(110, 110, 120, 0.9);
+  --game04-checked-fill: rgba(110, 110, 120, 0.4);
+  --game04-zoom-overlay: rgba(30, 25, 50, 0.55);
+  --game04-pop-shadow: rgba(0, 0, 0, 0.2);
 }
 
 * {

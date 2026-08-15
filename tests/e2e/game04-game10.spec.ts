@@ -92,6 +92,24 @@ test('game10 evidence and responsibility cards support keyboard activation', asy
   await expect(page.locator('.g10-token.empty')).toHaveCount(1, { timeout: 1_500 });
 });
 
+test('game10 enlarged evidence is a keyboard-contained dialog and restores focus', async ({ page }) => {
+  await openGame(page, 10);
+  await page.getByRole('button', { name: /증거를 살펴보자/ }).click();
+  const trigger = page.locator('.g10-ev').first();
+  await trigger.click();
+  await trigger.focus();
+  await page.keyboard.press('Enter');
+
+  const dialog = page.getByRole('dialog', { name: /블랙박스 기록/ });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('button', { name: /닫기/ })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(dialog.getByRole('button', { name: /닫기/ })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+});
+
 test('game04 and game10 retain 44px physical primary targets on a phone', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await openGame(page, 4);

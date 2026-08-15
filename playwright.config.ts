@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const port = 4177;
+process.env.MINIETHICS_E2E_PORT ??= String(20_000 + (process.pid % 20_000));
+const port = Number(process.env.MINIETHICS_E2E_PORT);
 
 export default defineConfig({
   testDir: './tests/e2e',

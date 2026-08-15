@@ -56,7 +56,13 @@ export function renderResponsibility(options: ResponsibilityOptions) {
     row.appendChild(card);
     card.addEventListener('click', (event) => {
       if (busy) return;
-      if (!defendant.ai && slots.contains(event.target as Node) && event.target !== card && placed[defendant.key] > 0) {
+      if (
+        !defendant.ai &&
+        event.target instanceof Node &&
+        slots.contains(event.target) &&
+        event.target !== card &&
+        placed[defendant.key] > 0
+      ) {
         placed[defendant.key]--;
         remain++;
         audio.click();

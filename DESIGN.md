@@ -11,6 +11,7 @@ Miniethics is a bright, cel-shaded AI ethics adventure for Korean grade 5–6 le
 - Supporting accents: pink `#ff8fb1`, mint `#6ee7c8`, sky `#7cc7ff`, orange `#ffab5e`.
 - Text: ink `#3a3352`, soft ink `#6b6488`; surfaces: paper `#fffdf5`, cream `#fff7e0`.
 - Focus must remain visible independently of fill color. Correct, wrong, current, locked, and selected states must not rely on color alone.
+- Extracted game views use the shared `--game-*` surface, overlay, disabled, focus, and semantic palette tokens. Game modules do not introduce untracked color literals.
 
 ## 3. Typography
 
@@ -29,6 +30,7 @@ The logical canvas is 1280×800. A 4 px spacing rhythm underlies 8/12/16/20/24/3
 - `.dialog-box`: speaker, live dialogue text, keyboard/pointer advance, mission transition.
 - Quiz choices: default, disabled, correct, wrong, and explained states with a live explanation.
 - Status surfaces: map toast and orientation hint are polite announcements; recovery failures are alerts.
+- Modal evidence cards use `role="dialog"`, keep keyboard focus inside while open, close with Escape, and restore focus to their trigger.
 
 ## 6. Motion
 

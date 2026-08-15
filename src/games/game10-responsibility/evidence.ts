@@ -43,7 +43,7 @@ export function renderEvidence({ wrap, stage, data, audio, say, shake, onReady }
     card.appendChild(inner);
     row.appendChild(card);
     card.addEventListener('click', () => {
-      if (flipped[index]) return openEvidence(stage, item, audio);
+      if (flipped[index]) return openEvidence(stage, item, audio, card);
       flipped[index] = true;
       card.classList.add('flip');
       card.setAttribute('aria-pressed', 'true');
@@ -63,14 +63,35 @@ export function renderEvidence({ wrap, stage, data, audio, say, shake, onReady }
   stage.append(title, row, gate);
 }
 
-function openEvidence(stage: HTMLElement, item: Evidence, audio: GameCtx['audio']) {
+function openEvidence(
+  stage: HTMLElement,
+  item: Evidence,
+  audio: GameCtx['audio'],
+  trigger: HTMLButtonElement
+) {
   audio.click();
   const modal = el('div', 'g10-modal');
-  const card = el('div', 'g10-modal-card', `<div class="g10-ico">${item.icon}</div><div class="g10-t">${item.title}</div><div class="g10-d">${item.desc}</div>`);
-  card.appendChild(button('닫기 ✖', () => modal.remove(), 'btn ghost'));
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-labelledby', 'g10-evidence-dialog-title');
+  const card = el('div', 'g10-modal-card', `<div class="g10-ico">${item.icon}</div><div class="g10-t" id="g10-evidence-dialog-title">${item.title}</div><div class="g10-d">${item.desc}</div>`);
+  const close = () => {
+    modal.remove();
+    trigger.focus({ preventScroll: true });
+  };
+  const closeButton = button('닫기 ✖', close, 'btn ghost');
+  card.appendChild(closeButton);
   modal.appendChild(card);
   modal.addEventListener('click', (event) => {
-    if (event.target === modal) modal.remove();
+    if (event.target === modal) close();
+  });
+  modal.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') close();
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      closeButton.focus({ preventScroll: true });
+    }
   });
   stage.appendChild(modal);
+  closeButton.focus({ preventScroll: true });
 }
