@@ -1,0 +1,16 @@
+{
+  "name": "AI 윤리 미니게임 천국",
+  "short_name": "AI윤리게임",
+  "description": "초등 5-6학년을 위한 인공지능 윤리 12차시 미니게임 학습 앱",
+  "lang": "ko",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#bfe7ff",
+  "theme_color": "#7ec8ff",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
