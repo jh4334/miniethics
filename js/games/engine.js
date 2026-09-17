@@ -119,12 +119,27 @@ export function starsFromRatio(ratio) {
   return 1;
 }
 
+// 프레임 속도 보정: rAF 타임스탬프로 60fps 기준 배율(dt)을 계산
+// 120Hz 태블릿에서 2배속, 저사양 기기에서 반속이 되는 것을 막는다
+export function frameScaler() {
+  let last = null;
+  return (now) => {
+    const dt = last === null ? 1 : Math.min(3, (now - last) / (1000 / 60));
+    last = now;
+    return dt;
+  };
+}
+
 // 포인터 드래그 헬퍼 (터치/마우스 공용)
+// 첫 손가락(isPrimary)만 추적해 두 번째 손가락이 닿아도 드래그가 끊기지 않게 한다
 export function draggable(el, { onStart, onMove, onEnd }) {
   let dragging = false;
+  let activeId = null;
   let startX = 0, startY = 0;
   const down = (e) => {
+    if (dragging || e.isPrimary === false) return;
     dragging = true;
+    activeId = e.pointerId;
     const p = point(e);
     startX = p.x; startY = p.y;
     el.setPointerCapture?.(e.pointerId);
@@ -132,14 +147,15 @@ export function draggable(el, { onStart, onMove, onEnd }) {
     e.preventDefault();
   };
   const move = (e) => {
-    if (!dragging) return;
+    if (!dragging || e.pointerId !== activeId) return;
     const p = point(e);
     onMove?.({ ...p, dx: p.x - startX, dy: p.y - startY }, e);
     e.preventDefault();
   };
   const up = (e) => {
-    if (!dragging) return;
+    if (!dragging || e.pointerId !== activeId) return;
     dragging = false;
+    activeId = null;
     const p = point(e);
     onEnd?.({ ...p, dx: p.x - startX, dy: p.y - startY }, e);
   };

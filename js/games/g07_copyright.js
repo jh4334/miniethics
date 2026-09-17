@@ -1,5 +1,5 @@
 // 7차시: 저작권 O/X 달리기 - 문장을 읽고 알맞은 문으로 달려 통과!
-import { buildStage, countdown, toast, shuffle } from './engine.js';
+import { buildStage, countdown, toast, shuffle, frameScaler } from './engine.js';
 import { sfx } from '../audio.js';
 
 const STATEMENTS = [
@@ -14,6 +14,7 @@ const STATEMENTS = [
   { s: '남의 글을 그대로 베껴서 내 숙제로 내도 된다', a: false, why: '베끼는 것은 표절! 내 생각으로 써야 해요.' },
   { s: '저작권은 어른들만 지키면 되는 규칙이다', a: false, why: '저작권은 우리 모두가 지키는 약속이에요!' },
 ];
+const FALL_SECONDS = 5.5; // 문이 러너에 닿기까지의 시간 (읽고 판단할 시간)
 
 export default {
   id: 7,
@@ -21,10 +22,11 @@ export default {
     const ui = buildStage(host, { time: 0, scoreLabel: '점수' });
     host.querySelector('.hud-time').style.visibility = 'hidden';
     let score = 0, correct = 0, idx = 0, alive = false;
-    let lane = 0; // 0=왼쪽(O), 1=오른쪽(X)
+    let lane = null; // null=아직 선택 안 함, 0=왼쪽(O), 1=오른쪽(X)
     let rafId = null;
     const timeouts = [];
     const deck = shuffle(STATEMENTS);
+    const scale = frameScaler();
 
     ui.body.innerHTML = `
       <div style="position:absolute;inset:0;background:linear-gradient(180deg,#d8f3d8,#f0fbe8);overflow:hidden;">
@@ -36,7 +38,7 @@ export default {
           <div class="gate gate-x" style="flex:1;text-align:center;font-size:64px;">❌</div>
         </div>
         <div style="position:absolute;top:0;bottom:0;left:50%;width:5px;background:repeating-linear-gradient(180deg,#b7d9a8 0 26px,transparent 26px 52px);"></div>
-        <div class="runner" style="position:absolute;bottom:34px;left:25%;transform:translateX(-50%);font-size:60px;transition:left 0.15s ease;z-index:6;">🏃</div>
+        <div class="runner" style="position:absolute;bottom:34px;left:50%;transform:translateX(-50%);font-size:60px;transition:left 0.15s ease;z-index:6;">🏃</div>
         <div style="position:absolute;bottom:4px;left:0;right:0;display:flex;justify-content:space-around;font-size:14px;color:var(--ink-soft);z-index:2;">
           <span>👈 왼쪽 탭 = ⭕ 맞아요</span><span>오른쪽 탭 = ❌ 아니에요 👉</span>
         </div>
@@ -61,33 +63,40 @@ export default {
       if (!alive) return;
       if (idx >= deck.length) {
         alive = false;
-        const ratio = correct / deck.length;
         ctx.finish({
           score,
-          stars: ratio >= 0.8 ? 3 : ratio >= 0.5 ? 2 : 1,
+          stars: correct >= 9 ? 3 : correct >= 7 ? 2 : 1,
           msg: `${deck.length}개 문 중 ${correct}개를 바르게 통과!<br>창작물을 존중하는 마음, 멋져요 ©️`,
         });
         return;
       }
       const q = deck[idx];
       banner.innerHTML = `<b>Q${idx + 1}.</b> ${q.s}`;
+      // 매 문항마다 가운데에서 다시 선택하게 함 (가만히 있으면 통과 못 함)
+      lane = null;
+      runner.style.left = '50%';
       let y = -120;
-      const bodyH = ui.body.clientHeight;
-      const targetY = bodyH - 110;
-      const speed = Math.max(2.2, bodyH / 260);
 
-      function fall() {
+      function fall(now) {
         if (!alive) return;
-        y += speed;
+        const dt = scale(now);
+        // 화면 회전에 대비해 매 프레임 높이를 다시 계산. 속도는 시간 기준(약 FALL_SECONDS초에 도착)
+        const bodyH = ui.body.clientHeight;
+        const targetY = bodyH - 110;
+        const speed = (targetY + 120) / (FALL_SECONDS * 60);
+        y += speed * dt;
         gates.style.top = `${y}px`;
         if (y < targetY) { rafId = requestAnimationFrame(fall); return; }
         // 도착! 판정
-        const choseO = lane === 0;
-        const ok = choseO === q.a;
+        const ok = lane !== null && (lane === 0) === q.a;
         if (ok) {
           correct++; score += 15; sfx.good();
           runner.textContent = '🙌';
           toast(ui.body, `⭕ 통과! ${q.why}`, 1400);
+        } else if (lane === null) {
+          score = Math.max(0, score - 5); sfx.bad();
+          runner.textContent = '😵';
+          toast(ui.body, `😵 문을 고르지 않았어요! 정답은 ${q.a ? '⭕' : '❌'}. ${q.why}`, 1600);
         } else {
           score = Math.max(0, score - 5); sfx.bad();
           runner.textContent = '💫';
@@ -103,7 +112,7 @@ export default {
 
     const stopCd = countdown(host, {
       title: '🎨 저작권 O/X 달리기',
-      help: '위의 문장을 읽고 맞으면 ⭕문, 틀리면 ❌문으로!<br>화면 왼쪽/오른쪽을 탭해서 달릴 방향을 정해요',
+      help: '위의 문장을 읽고 맞으면 ⭕문, 틀리면 ❌문으로!<br>화면 왼쪽/오른쪽을 탭해서 달릴 방향을 정해요. 안 고르면 통과 못 해요!',
     }, () => { alive = true; nextRound(); });
 
     return () => { alive = false; stopCd(); cancelAnimationFrame(rafId); timeouts.forEach(clearTimeout); };

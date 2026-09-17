@@ -48,7 +48,7 @@ export default {
         score,
         stars: survived && correct >= 10 ? 3 : correct >= 7 ? 2 : 1,
         msg: survived
-          ? `🎊 골든벨 완주! ${deck.length}문제 중 ${correct}문제 정답!<br>당신은 진정한 AI 윤리 챔피언입니다! 👑`
+          ? `🎊 골든벨 완주! ${deck.length}문제 중 ${correct}문제 정답!<br>여러분은 진정한 AI 윤리 챔피언이에요! 👑`
           : `${correct}문제까지 성공! 하트가 다 떨어졌지만<br>여기까지 온 것도 대단해요. 다시 도전해 볼까요? 💪`,
       });
     }

@@ -1,5 +1,5 @@
 // 1차시: AI야? 아니야? - 빠른 판별 탭 게임
-import { buildStage, countdown, gameTimer, floatScore, toast, starsFromRatio, shuffle } from './engine.js';
+import { buildStage, countdown, gameTimer, floatScore, toast, shuffle } from './engine.js';
 import { sfx } from '../audio.js';
 
 const ITEMS = [
@@ -8,7 +8,7 @@ const ITEMS = [
   { e: '🚗', name: '자율주행차', ai: true, why: '도로를 보고 스스로 판단해요' },
   { e: '📷', name: '얼굴 인식 카메라', ai: true, why: '얼굴을 배우고 알아봐요' },
   { e: '💬', name: 'AI 챗봇', ai: true, why: '대화를 배우고 대답을 만들어요' },
-  { e: '🧹', name: '로봇 청소기', ai: true, why: '집 구조를 배우고 길을 찾아요' },
+  { e: '🗣️', name: '음성 비서(시리·빅스비)', ai: true, why: '말을 알아듣고 대답을 만들어요' },
   { e: '📺', name: '영상 추천 기능', ai: true, why: '내 취향을 배우고 골라줘요' },
   { e: '🎨', name: '그림 생성 AI', ai: true, why: '그림을 배우고 새로 만들어요' },
   { e: '🌀', name: '선풍기', ai: false, why: '정해진 대로 돌기만 해요' },
@@ -22,16 +22,18 @@ const ITEMS = [
 ];
 
 const TIME = 45;
-const MAX_REF = 200; // 별 3개 기준 점수
+const LOCK_MS = 400; // 답한 뒤 잠깐 입력 잠금 (연타·더블탭 방지)
 
 export default {
   id: 1,
   mount(host, ctx) {
     const ui = buildStage(host, { time: TIME });
-    let score = 0, combo = 0, timer = null, alive = true;
+    let score = 0, combo = 0, answered = 0, correctCount = 0;
+    let timer = null, alive = true, locked = false;
     let queue = shuffle(ITEMS);
     let qi = 0;
     let current = null;
+    const timeouts = [];
 
     ui.body.innerHTML = `
       <div style="flex:1;display:flex;flex-direction:column;">
@@ -49,6 +51,7 @@ export default {
     const emojiEl = ui.body.querySelector('.qi-emoji');
     const nameEl = ui.body.querySelector('.qi-name');
     const comboEl = ui.body.querySelector('.qi-combo');
+    const buttons = [...ui.body.querySelectorAll('.choice-buttons .btn')];
 
     function next() {
       if (qi >= queue.length) { queue = shuffle(ITEMS); qi = 0; }
@@ -61,12 +64,17 @@ export default {
     }
 
     function answer(saidAI, btn) {
-      if (!alive || !current) return;
+      if (!alive || !current || locked) return;
+      locked = true;
+      buttons.forEach((b) => { b.disabled = true; });
+      timeouts.push(setTimeout(() => { locked = false; buttons.forEach((b) => { b.disabled = false; }); }, LOCK_MS));
       const r = btn.getBoundingClientRect();
-      const h = host.getBoundingClientRect();
+      const h = ui.body.getBoundingClientRect();
       const correct = saidAI === current.ai;
+      answered++;
       if (correct) {
         combo++;
+        correctCount++;
         const gain = 10 + Math.min(combo - 1, 5) * 2;
         score += gain;
         sfx.good();
@@ -84,7 +92,7 @@ export default {
       next();
     }
 
-    ui.body.querySelectorAll('.choice-buttons .btn').forEach((btn) => {
+    buttons.forEach((btn) => {
       btn.addEventListener('click', () => answer(btn.dataset.ans === '1', btn));
     });
 
@@ -95,14 +103,17 @@ export default {
       next();
       timer = gameTimer(TIME, (t) => ui.setTime(t), () => {
         alive = false;
+        // 별점은 점수가 아니라 '정확도'로: 아무 버튼이나 연타해서는 별을 못 받도록
+        const acc = answered ? correctCount / answered : 0;
+        const stars = answered >= 12 && acc >= 0.9 ? 3 : answered >= 8 && acc >= 0.7 ? 2 : 1;
         ctx.finish({
           score,
-          stars: starsFromRatio(score / MAX_REF),
-          msg: 'AI는 스스로 배우고 판단하는 기술!<br>이제 주변의 AI를 찾아낼 수 있겠죠?',
+          stars,
+          msg: `${answered}개 중 ${correctCount}개를 정확히 판별했어요! (정확도 ${Math.round(acc * 100)}%)<br>AI는 스스로 배우고 판단하는 기술! 이제 주변의 AI를 찾아낼 수 있겠죠?`,
         });
       });
     });
 
-    return () => { alive = false; stopCd(); timer?.stop(); };
+    return () => { alive = false; stopCd(); timer?.stop(); timeouts.forEach(clearTimeout); };
   },
 };

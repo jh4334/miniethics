@@ -54,7 +54,7 @@ export default {
       alive = false;
       ctx.finish({
         score,
-        stars: wins >= 7 ? 3 : wins >= 4 ? 2 : 1,
+        stars: wins >= 7 ? 3 : wins >= 5 ? 2 : 1,
         msg: `${ROUNDS}판 중 ${wins}판을 AI보다 먼저 풀었어요!<br>먼저 스스로 생각하는 습관, 그게 진짜 실력이에요 🧠`,
       });
     }
@@ -95,10 +95,17 @@ export default {
             ui.setScore(score);
             timeouts.push(setTimeout(nextRound, 1100));
           } else {
+            // 오답이면 그 라운드는 AI 승리: 보기를 전부 눌러보는 전략이 통하지 않게
+            resolved = true;
+            cancelAnimationFrame(aiRaf);
             score = Math.max(0, score - 5);
             sfx.bad();
             b.classList.add('wrong');
+            optsEl.querySelectorAll('button').forEach((x) => { if (x.textContent === answer) x.classList.add('correct'); });
+            aiFace.textContent = '😏';
+            aiLabel.textContent = `앗, 오답! 정답은 ${answer}. 다음엔 차근차근 생각해요`;
             ui.setScore(score);
+            timeouts.push(setTimeout(nextRound, 1400));
           }
         });
         optsEl.appendChild(b);

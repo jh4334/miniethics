@@ -7,12 +7,12 @@ const ROUNDS = [
     { e: '👵', need: '"글자가 너무 작아서 안 보여요"', fix: '🔍 큰 글씨 모드' },
     { e: '🧏', need: '"소리를 들을 수 없어요"', fix: '💬 자막 기능' },
     { e: '👶', need: '"아직 글을 못 읽어요"', fix: '🔊 소리로 읽어주기' },
-    { e: '🧑‍🦽', need: '"손을 움직이기 어려워요"', fix: '🎙️ 음성 명령' },
+    { e: '🙋', need: '"손으로 화면을 누르기 어려워요"', fix: '🎙️ 음성 명령' },
   ],
   [
     { e: '🌏', need: '"한국어가 아직 서툴러요"', fix: '🌐 번역 기능' },
-    { e: '🙈', need: '"화면이 잘 안 보여요"', fix: '📢 화면 읽어주기' },
-    { e: '👴', need: '"복잡한 앱은 너무 어려워요"', fix: '🧸 쉬운 화면 모드' },
+    { e: '🧑‍🦯', need: '"화면이 잘 안 보여요"', fix: '📢 화면 읽어주기' },
+    { e: '🧑‍🦱', need: '"처음 써 봐서 복잡한 앱은 어려워요"', fix: '🧸 쉬운 화면 모드' },
     { e: '🗣️', need: '"사투리라서 AI가 못 알아들어요"', fix: '🎓 다양한 말투 학습' },
   ],
 ];
@@ -70,20 +70,19 @@ export default {
       let roundMatched = 0;
 
       board.querySelectorAll('.match-chip').forEach((chip) => {
-        let startRect = null;
+        // 칩은 흐름(flex)에 남겨두고 transform으로만 옮겨서 다른 칩들이 재정렬되지 않게 함
+        let startX = 0, startY = 0, activeId = null;
         const onDown = (e) => {
-          if (!alive || chip.classList.contains('used')) return;
-          startRect = chip.getBoundingClientRect();
+          if (!alive || chip.classList.contains('used') || activeId !== null || e.isPrimary === false) return;
+          activeId = e.pointerId;
+          startX = e.clientX; startY = e.clientY;
           chip.classList.add('dragging');
-          chip.style.left = `${e.clientX - startRect.width / 2}px`;
-          chip.style.top = `${e.clientY - 30}px`;
           chip.setPointerCapture(e.pointerId);
           e.preventDefault();
         };
         const onMove = (e) => {
-          if (!chip.classList.contains('dragging')) return;
-          chip.style.left = `${e.clientX - startRect.width / 2}px`;
-          chip.style.top = `${e.clientY - 30}px`;
+          if (e.pointerId !== activeId) return;
+          chip.style.transform = `translate(${e.clientX - startX}px, ${e.clientY - startY}px) scale(1.08)`;
           board.querySelectorAll('.match-target').forEach((t) => {
             const r = t.getBoundingClientRect();
             t.classList.toggle('drag-over',
@@ -92,10 +91,10 @@ export default {
           });
         };
         const onUp = (e) => {
-          if (!chip.classList.contains('dragging')) return;
+          if (e.pointerId !== activeId) return;
+          activeId = null;
           chip.classList.remove('dragging');
-          chip.style.left = '';
-          chip.style.top = '';
+          chip.style.transform = '';
           const target = [...board.querySelectorAll('.match-target')].find((t) => {
             const r = t.getBoundingClientRect();
             return !t.classList.contains('matched') &&

@@ -9,9 +9,15 @@ function ac() {
   if (!ctx) {
     try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
   }
-  if (ctx.state === 'suspended') ctx.resume();
+  // iOS Safari는 전화·시리·앱 전환 뒤 'interrupted' 상태가 되므로 running이 아니면 항상 복구 시도
+  if (ctx.state !== 'running') ctx.resume().catch(() => {});
   return ctx;
 }
+
+// 앱으로 돌아왔을 때 오디오 컨텍스트 복구
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+});
 
 function tone(freq, dur = 0.12, type = 'sine', gain = 0.15, when = 0) {
   const c = ac();

@@ -28,7 +28,7 @@ export default {
   mount(host, ctx) {
     const ui = buildStage(host, { time: TIME });
     let score = 0, alive = false, timer = null, spawnIv = null;
-    let blocked = 0, leaked = 0;
+    let blocked = 0, leaked = 0, wrongTaps = 0;
     const timeouts = [];
 
     ui.body.innerHTML = `
@@ -80,7 +80,7 @@ export default {
           score = Math.max(0, score - 8);
           ui.setScore(score);
           sfx.bad();
-          toast(ui.body, `😱 ${item.name}이(가) 유출됐어요! -8`, 1000);
+          toast(ui.body, `😱 ${item.name} 유출! -8`, 1000);
         }
       }, lifetime);
       timeouts.push(tid);
@@ -98,10 +98,12 @@ export default {
           card.innerHTML = `<span style="font-size:46px;">🛡️</span><span style="font-size:14px;">막았다!</span>`;
           floatScore(ui.body, x, y, '+12', true);
         } else {
-          score = Math.max(0, score - 5);
+          // 안전한 정보를 막으면 개인정보를 막은 만큼 감점: 읽지 않고 전부 탭하는 전략이 이득이 되지 않게
+          wrongTaps++;
+          score = Math.max(0, score - 10);
           sfx.bad();
           card.innerHTML = `<span style="font-size:46px;">😅</span><span style="font-size:13px;">이건 괜찮은 정보!</span>`;
-          floatScore(ui.body, x, y, '-5', false);
+          floatScore(ui.body, x, y, '-10 괜찮은 정보예요', false);
         }
         ui.setScore(score);
         const t2 = setTimeout(() => { card.remove(); hole.busy = false; }, 420);
@@ -118,10 +120,14 @@ export default {
       timer = gameTimer(TIME, (t) => ui.setTime(t), () => {
         alive = false;
         clearInterval(spawnIv);
+        // 별점: 점수 + '괜찮은 정보를 막은 횟수'가 적어야 높은 별
+        let stars = starsFromRatio(score / MAX_REF);
+        if (wrongTaps > 8) stars = Math.min(stars, 1);
+        else if (wrongTaps > 3) stars = Math.min(stars, 2);
         ctx.finish({
           score,
-          stars: starsFromRatio(score / MAX_REF),
-          msg: `개인정보 ${blocked}개를 지켰어요!${leaked ? ` (${leaked}개는 유출... 😢)` : ' 완벽한 보안관!'}<br>개인정보는 소중한 열쇠, 함부로 공개하지 않아요!`,
+          stars,
+          msg: `개인정보 ${blocked}개를 지켰어요!${leaked ? ` (${leaked}개는 유출 😢)` : ''}${wrongTaps ? ` 괜찮은 정보를 ${wrongTaps}번 막았어요.` : ' 완벽한 보안관!'}<br>개인정보는 소중한 열쇠, 함부로 공개하지 않아요!`,
         });
       });
     });

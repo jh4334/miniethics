@@ -23,21 +23,49 @@ const GAMES = { 1: g01, 2: g02, 3: g03, 4: g04, 5: g05, 6: g06, 7: g07, 8: g08, 
 
 const app = document.getElementById('app');
 let cleanupGame = null;
+let currentGameId = null;
+let fromPop = false; // popstate로 인한 화면 전환이면 history를 쌓지 않음
 
-function render(html) {
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const starStr = (n) => '⭐'.repeat(n) + '☆'.repeat(3 - n);
+const lessonOf = (id) => LESSONS.find((l) => l.id === id);
+
+// 화면 렌더링. nav = { screen, id } 로 뒤로가기 히스토리에 기록
+function render(html, nav) {
   cleanupGame?.();
   cleanupGame = null;
+  currentGameId = null;
   app.innerHTML = html;
+  // 화면 전환 직후 같은 자리에 온 버튼이 더블탭의 두 번째 탭을 받지 않도록 잠깐 입력 차단
+  app.style.pointerEvents = 'none';
+  setTimeout(() => { app.style.pointerEvents = ''; }, 350);
+  if (nav) {
+    if (fromPop) fromPop = false;
+    else history.pushState(nav, '');
+  }
 }
 
-const starStr = (n) => '⭐'.repeat(n) + '☆'.repeat(3 - n);
+// 안드로이드 뒤로가기(버튼/제스처)가 앱 밖으로 나가지 않도록 화면 단위로 라우팅
+window.addEventListener('popstate', (e) => {
+  const s = e.state || { screen: 'title' };
+  fromPop = true;
+  if (s.screen === 'title') showTitle();
+  else if (s.screen === 'map') showMap();
+  else if (s.screen === 'concepts') showConcepts(s.id);
+  else { history.replaceState({ screen: 'map' }, ''); showMap(); } // 게임/퀴즈 등 진행 화면은 지도로
+});
+
+// 홈 버튼/알림 등으로 앱을 벗어나면 진행 중인 게임을 안전하게 중단
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && cleanupGame && currentGameId) showInterrupted(currentGameId);
+});
 
 // ---------- 타이틀 ----------
 function showTitle() {
   const cleared = S.clearedCount();
   render(`
     <div class="screen title-screen">
-      <div class="title-logo">🤖</div>
+      <div class="title-logo" id="title-logo">🤖</div>
       <h1 class="title-name">AI 윤리<br>미니게임 천국</h1>
       <div class="title-sub">12개의 미니게임으로 배우는 인공지능 윤리!</div>
       <div class="title-badges">
@@ -49,7 +77,7 @@ function showTitle() {
         <button class="btn btn-ghost" id="reset-btn">🗑️ 처음부터</button>
       </div>
     </div>
-  `);
+  `, { screen: 'title' });
   document.getElementById('start-btn').addEventListener('click', () => { sfx.tap(); showMap(); });
   document.getElementById('sound-btn').addEventListener('click', (e) => {
     const on = S.toggleSound();
@@ -60,6 +88,18 @@ function showTitle() {
     if (confirm('정말 모든 진행 상황을 지우고 처음부터 시작할까요?')) {
       S.resetAll();
       showTitle();
+    }
+  });
+  // 교사용 숨은 메뉴: 로고를 5번 연속 탭하면 원하는 차시까지 열 수 있음
+  let taps = 0, tapTimer = null;
+  document.getElementById('title-logo').addEventListener('click', () => {
+    taps++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => { taps = 0; }, 2500);
+    if (taps >= 5) {
+      taps = 0;
+      const n = parseInt(prompt('👩‍🏫 교사용 메뉴\n몇 차시까지 열까요? (1~12)'), 10);
+      if (n >= 1 && n <= 12) { S.unlockThrough(n); sfx.badge(); showMap(); }
     }
   });
 }
@@ -97,7 +137,7 @@ function showMap() {
       ${cleared >= 12 ? `<div style="text-align:center;padding-bottom:24px;">
         <button class="btn btn-primary" id="cert-btn">🎓 수료증 보기</button></div>` : ''}
     </div>
-  `);
+  `, { screen: 'map' });
   document.getElementById('back-btn').addEventListener('click', () => { sfx.tap(); showTitle(); });
   document.getElementById('cert-btn')?.addEventListener('click', () => { sfx.tap(); showCertificate(); });
   app.querySelectorAll('.stage-card:not(.locked)').forEach((card) => {
@@ -107,7 +147,7 @@ function showMap() {
 
 // ---------- 개념 카드 ----------
 function showConcepts(id) {
-  const lesson = LESSONS.find((l) => l.id === id);
+  const lesson = lessonOf(id);
   let idx = 0;
   render(`
     <div class="screen">
@@ -125,7 +165,7 @@ function showConcepts(id) {
         </div>
       </div>
     </div>
-  `);
+  `, { screen: 'concepts', id });
   const ccard = document.getElementById('ccard');
   const cdots = document.getElementById('cdots');
   const prevBtn = document.getElementById('prev-btn');
@@ -133,6 +173,7 @@ function showConcepts(id) {
 
   function renderCard() {
     const c = lesson.concepts[idx];
+    const last = idx === lesson.concepts.length - 1;
     ccard.style.animation = 'none';
     void ccard.offsetWidth;
     ccard.style.animation = 'pop-in 0.3s ease';
@@ -140,11 +181,12 @@ function showConcepts(id) {
       <div class="c-emoji">${c.emoji}</div>
       <div class="c-title">${c.title}</div>
       <div class="c-text">${c.text}</div>
+      ${last ? `<div class="c-howto"><b>🎮 게임 방법</b><br>${lesson.howto}</div>` : ''}
     `;
     cdots.innerHTML = lesson.concepts.map((_, i) => `<span class="${i === idx ? 'on' : ''}"></span>`).join('');
     prevBtn.style.visibility = idx === 0 ? 'hidden' : 'visible';
-    nextBtn.textContent = idx === lesson.concepts.length - 1 ? `🎮 ${lesson.gameName} 시작!` : '다음 ▶';
-    nextBtn.className = idx === lesson.concepts.length - 1 ? 'btn btn-green' : 'btn btn-primary';
+    nextBtn.textContent = last ? `🎮 ${lesson.gameName} 시작!` : '다음 ▶';
+    nextBtn.className = last ? 'btn btn-green' : 'btn btn-primary';
   }
   renderCard();
   document.getElementById('back-btn').addEventListener('click', () => { sfx.tap(); showMap(); });
@@ -158,7 +200,7 @@ function showConcepts(id) {
 
 // ---------- 미니게임 ----------
 function showGame(id) {
-  const lesson = LESSONS.find((l) => l.id === id);
+  const lesson = lessonOf(id);
   render(`
     <div class="screen">
       <div class="topbar">
@@ -168,22 +210,47 @@ function showGame(id) {
       </div>
       <div class="game-stage" id="stage"></div>
     </div>
-  `);
+  `, { screen: 'game', id });
   document.getElementById('back-btn').addEventListener('click', () => { sfx.tap(); showMap(); });
   const stage = document.getElementById('stage');
   const game = GAMES[id];
+  let finished = false;
   cleanupGame = game.mount(stage, {
     finish(result) {
+      if (finished) return; // 이중 호출 방지
+      finished = true;
       cleanupGame?.();
       cleanupGame = null;
+      currentGameId = null;
       showResult(id, result);
     },
   });
+  currentGameId = id;
+}
+
+// ---------- 게임 중단 (앱 전환 등) ----------
+function showInterrupted(id) {
+  const lesson = lessonOf(id);
+  render(`
+    <div class="screen">
+      <div class="interrupt-wrap">
+        <div style="font-size:72px;">😴</div>
+        <div style="font-family:var(--font-title);font-size:26px;">게임이 잠시 멈췄어요</div>
+        <div style="color:var(--ink-soft);line-height:1.6;">앱을 벗어나서 ${lesson.gameName} 게임을 중단했어요.<br>준비되면 다시 도전해요!</div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-ghost" id="map-btn">🗺️ 배움 지도</button>
+          <button class="btn btn-green" id="retry-btn">🔄 다시 도전</button>
+        </div>
+      </div>
+    </div>
+  `, { screen: 'interrupted', id });
+  document.getElementById('map-btn').addEventListener('click', () => { sfx.tap(); showMap(); });
+  document.getElementById('retry-btn').addEventListener('click', () => { sfx.tap(); showGame(id); });
 }
 
 // ---------- 게임 결과 ----------
 function showResult(id, { score, stars, msg }) {
-  const lesson = LESSONS.find((l) => l.id === id);
+  const lesson = lessonOf(id);
   const prev = S.getLesson(id);
   const isNewBest = score > prev.bestScore;
   S.setLessonResult(id, { stars, score });
@@ -204,15 +271,18 @@ function showResult(id, { score, stars, msg }) {
         </div>
       </div>
     </div>
-  `);
+  `, { screen: 'result', id });
   document.getElementById('retry-btn').addEventListener('click', () => { sfx.tap(); showGame(id); });
   document.getElementById('quiz-btn').addEventListener('click', () => { sfx.tap(); showQuiz(id); });
 }
 
 // ---------- 성찰 퀴즈 ----------
+// 해설 문장은 '맞아요!/아니에요.'로 시작하므로, 내 답의 정오와 헷갈리지 않게 접두어를 떼고 문장의 참/거짓을 따로 표시
+const stripPrefix = (why) => why.replace(/^(맞아요|아니에요)[!.]?\s*/, '');
+
 function showQuiz(id) {
-  const lesson = LESSONS.find((l) => l.id === id);
-  let qi = 0, correct = 0;
+  const lesson = lessonOf(id);
+  let qi = 0, correct = 0, answered = false;
   render(`
     <div class="screen">
       <div class="quiz-wrap">
@@ -227,7 +297,7 @@ function showQuiz(id) {
         </div>
       </div>
     </div>
-  `);
+  `, { screen: 'quiz', id });
   const qp = document.getElementById('qp');
   const qq = document.getElementById('qq');
   const qox = document.getElementById('qox');
@@ -235,6 +305,7 @@ function showQuiz(id) {
 
   function renderQ() {
     const q = lesson.quiz[qi];
+    answered = false;
     qp.textContent = `📝 성찰 퀴즈 ${qi + 1} / ${lesson.quiz.length}`;
     qq.textContent = q.q;
     qexp.innerHTML = '';
@@ -243,23 +314,29 @@ function showQuiz(id) {
   renderQ();
 
   function answer(saidO) {
+    if (answered) return;
+    answered = true;
     const q = lesson.quiz[qi];
     const ok = saidO === q.a;
     if (ok) { correct++; sfx.good(); } else sfx.bad();
     qox.style.display = 'none';
     qexp.innerHTML = `
       <div class="quiz-explain ${ok ? 'good' : 'bad'}">
-        <b>${ok ? '⭕ 정답!' : '❌ 앗, 아니에요!'}</b><br>${q.why}
+        <b>${ok ? '⭕ 정답!' : '❌ 앗, 틀렸어요!'}</b> 이 문장은 <b>${q.a ? '맞는 말' : '틀린 말'}</b>이에요.<br>${stripPrefix(q.why)}
       </div>
       <div style="margin-top:14px;">
         <button class="btn btn-primary" id="q-next">${qi < lesson.quiz.length - 1 ? '다음 문제 ▶' : '결과 보기 🎁'}</button>
       </div>
     `;
-    document.getElementById('q-next').addEventListener('click', () => {
+    const nextBtn = document.getElementById('q-next');
+    nextBtn.addEventListener('click', () => {
+      nextBtn.disabled = true;
       sfx.tap();
       qi++;
-      if (qi < lesson.quiz.length) renderQ();
-      else {
+      if (qi < lesson.quiz.length) {
+        // 버튼 자리에 다음 문제의 ⭕/❌가 오므로 더블탭 방지용 짧은 지연
+        setTimeout(renderQ, 250);
+      } else {
         S.setQuizResult(id, correct);
         showBadge(id, correct);
       }
@@ -271,7 +348,7 @@ function showQuiz(id) {
 
 // ---------- 배지 획득 ----------
 function showBadge(id, quizCorrect) {
-  const lesson = LESSONS.find((l) => l.id === id);
+  const lesson = lessonOf(id);
   const allCleared = S.clearedCount() >= 12;
   sfx.badge();
   render(`
@@ -291,7 +368,7 @@ function showBadge(id, quizCorrect) {
         </div>
       </div>
     </div>
-  `);
+  `, { screen: 'badge', id });
   document.getElementById('map-btn').addEventListener('click', () => { sfx.tap(); showMap(); });
   document.getElementById('next-lesson-btn')?.addEventListener('click', () => { sfx.tap(); showConcepts(id + 1); });
   document.getElementById('cert-btn')?.addEventListener('click', () => { sfx.tap(); showCertificate(); });
@@ -301,7 +378,7 @@ function showBadge(id, quizCorrect) {
 function showCertificate() {
   let name = S.getState().name;
   if (!name) {
-    name = (prompt('수료증에 들어갈 이름을 알려주세요! ✏️') || '').trim();
+    name = (prompt('수료증에 들어갈 이름을 알려주세요! ✏️ (20자까지)') || '').trim().slice(0, 20);
     if (name) S.setName(name);
   }
   const today = new Date();
@@ -311,7 +388,7 @@ function showCertificate() {
       <div class="result-wrap">
         <div class="cert-card">
           <div class="cert-title">🎓 수료증 🎓</div>
-          <div class="cert-name">${name || '멋진 어린이'}</div>
+          <div class="cert-name">${escapeHtml(name || '멋진 어린이')}</div>
           <div class="cert-text">
             위 어린이는 <b>AI 윤리 미니게임 천국</b>의<br>
             12차시 과정을 모두 마치고<br>
@@ -329,13 +406,28 @@ function showCertificate() {
         <div style="font-size:14px;color:var(--ink-soft);">📸 화면을 캡처해서 선생님께 보여주세요!</div>
       </div>
     </div>
-  `);
+  `, { screen: 'cert' });
   document.getElementById('map-btn').addEventListener('click', () => { sfx.tap(); showMap(); });
   document.getElementById('home-btn').addEventListener('click', () => { sfx.tap(); showTitle(); });
 }
 
 // ---------- 시작 ----------
-showTitle();
+try {
+  history.replaceState({ screen: 'title' }, '');
+  fromPop = true; // 첫 화면은 history를 추가로 쌓지 않음
+  showTitle();
+} catch (err) {
+  // 저장 데이터가 깨져도 '불러오는 중'에 갇히지 않도록 복구 화면 제공
+  console.error(err);
+  app.innerHTML = `
+    <div class="screen interrupt-wrap">
+      <div style="font-size:64px;">🛠️</div>
+      <div style="font-family:var(--font-title);font-size:24px;">앱을 여는 중 문제가 생겼어요</div>
+      <div style="color:var(--ink-soft);">저장된 진행 상황을 초기화하면 다시 시작할 수 있어요.</div>
+      <button class="btn btn-primary" id="recover-btn">🗑️ 초기화하고 다시 시작</button>
+    </div>`;
+  document.getElementById('recover-btn').addEventListener('click', () => { S.resetAll(); location.reload(); });
+}
 
 // 개발/테스트용 훅 (콘솔에서 화면 이동 가능)
-window.__go = { showTitle, showMap, showConcepts, showGame, showResult, showQuiz, showBadge, showCertificate };
+window.__go = { showTitle, showMap, showConcepts, showGame, showResult, showQuiz, showBadge, showCertificate, showInterrupted };

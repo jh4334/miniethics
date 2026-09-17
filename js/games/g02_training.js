@@ -4,7 +4,7 @@ import { buildStage, countdown, floatScore, toast, shuffle, draggable } from './
 import { sfx } from '../audio.js';
 
 const CATS = ['🐱', '😺', '😸', '😻', '🐈', '🐈‍⬛'];
-const DOGS = ['🐶', '🐕', '🦮', '🐩', '🐕‍🦺', '🌭'.slice(0, 0) || '🐶'];
+const DOGS = ['🐶', '🐕', '🦮', '🐩', '🐕‍🦺'];
 const TRAIN_COUNT = 10;
 const TEST_COUNT = 5;
 
@@ -117,20 +117,25 @@ export default {
         ...shuffle(DOGS).slice(0, 2).map((e) => ({ e, kind: 'dog' })),
       ]).slice(0, TEST_COUNT);
       let ti = 0, aiCorrect = 0;
+      // 시험 결과는 운이 아니라 '가르친 정확도'에 비례해 확정 (틀릴 문제만 무작위)
+      const targetCorrect = Math.round(acc * TEST_COUNT);
+      const wrongSet = new Set(shuffle([0, 1, 2, 3, 4]).slice(0, TEST_COUNT - targetCorrect));
 
       function testOne() {
         if (!alive) return;
         if (ti >= testDeck.length) {
           const score = trainCorrect * 10 + aiCorrect * 10;
-          const stars = acc >= 0.9 && aiCorrect >= 4 ? 3 : acc >= 0.7 ? 2 : 1;
+          const stars = acc >= 0.9 ? 3 : acc >= 0.7 ? 2 : 1;
           later(() => ctx.finish({
             score,
             stars,
-            msg: `내가 가르친 정확도 ${Math.round(acc * 100)}% → AI 시험 점수 ${aiCorrect}/${TEST_COUNT}!<br>AI의 실력은 가르친 데이터에 달려 있어요.`,
+            msg: `내가 가르친 정확도 ${Math.round(acc * 100)}% → AI 시험 점수 ${aiCorrect}/${TEST_COUNT}!<br>가르친 만큼 AI도 맞혀요. AI의 실력은 가르친 데이터에 달려 있어요.`,
           }), 900);
           return;
         }
-        const item = testDeck[ti++];
+        const item = testDeck[ti];
+        const willBeRight = !wrongSet.has(ti);
+        ti++;
         area.innerHTML = `
           <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:24px;">
             <div style="font-size:84px;">${item.e}</div>
@@ -145,7 +150,7 @@ export default {
         const guessText = area.querySelector('.guess-text');
         later(() => {
           if (!alive) return;
-          const right = Math.random() < Math.max(0.15, acc);
+          const right = willBeRight;
           const said = right ? item.kind : (item.kind === 'cat' ? 'dog' : 'cat');
           guessEl.textContent = said === 'cat' ? '🐱' : '🐶';
           guessText.textContent = said === 'cat' ? '"고양이!"' : '"강아지!"';
@@ -160,7 +165,7 @@ export default {
 
     const stopCd = countdown(host, {
       title: '🐱 AI 훈련소',
-      help: '떨어진 사진을 알맞은 바구니로 드래그!<br>내가 정확히 가르쳐야 AI가 시험을 잘 봐요 🎓',
+      help: '위에 나타난 사진을 알맞은 바구니로 드래그!<br>내가 정확히 가르쳐야 AI가 시험을 잘 봐요 🎓'
     }, spawnCard);
 
     return () => {

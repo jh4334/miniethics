@@ -1,5 +1,5 @@
 // 11차시: 안전운전 자율주행 - 장애물 피하기 + 판단 정지 퀴즈
-import { buildStage, countdown, floatScore, toast, pick, randInt, shuffle } from './engine.js';
+import { buildStage, countdown, floatScore, toast, pick, randInt, shuffle, frameScaler } from './engine.js';
 import { sfx } from '../audio.js';
 
 const OBSTACLES = ['🚧', '🐕', '⚽', '🛢️', '🚙'];
@@ -18,7 +18,7 @@ const JUDGES = [
   },
   {
     q: '⚠️ 타고 있는 차의 AI가 이상하게 작동하는 것 같아요!',
-    options: ['안전한 곳에 세우고 어른과 회사에 알린다', '괜찮겠지 하고 그냥 계속 탄다', '재미있으니 아무에게도 말하지 않는다'],
+    options: ['운전하는 어른에게 바로 말해 안전한 곳에 세우고, 만든 회사에도 알린다', '괜찮겠지 하고 그냥 계속 탄다', '재미있으니 아무에게도 말하지 않는다'],
     a: 0,
     why: '문제를 발견하면 솔직하게 알리는 것이 책임감 있는 행동이에요!',
   },
@@ -30,7 +30,8 @@ export default {
   id: 11,
   mount(host, ctx) {
     const ui = buildStage(host, { time: TIME });
-    let score = 0, dodged = 0, hits = 0, judgeOK = 0;
+    let score = 0, dodged = 0, hits = 0, judgeOK = 0; // judgeOK = 첫 시도에 맞힌 판단 퀴즈 수
+    const scale = frameScaler();
     let alive = false, paused = false;
     let lane = 1; // 0,1,2
     let rafId = null, spawnIv = null, tickIv = null;
@@ -85,13 +86,14 @@ export default {
       obstacles.add(el);
     }
 
-    function loop() {
+    function loop(now) {
       if (!alive) return;
+      const dt = scale(now);
       if (!paused) {
         const h = road.clientHeight;
         const carTop = h - 92;
         obstacles.forEach((el) => {
-          const y = parseFloat(el.style.top) + parseFloat(el.dataset.speed);
+          const y = parseFloat(el.style.top) + parseFloat(el.dataset.speed) * dt;
           el.style.top = `${y}px`;
           if (el.dataset.scored === '0' && y > carTop && y < carTop + 60 && Number(el.dataset.lane) === lane) {
             el.dataset.scored = '1';
@@ -130,19 +132,26 @@ export default {
         </div>
       `;
       ui.body.appendChild(modal);
+      let tries = 0;
       modal.querySelectorAll('button').forEach((b) => {
         b.addEventListener('click', () => {
+          if (b.disabled) return;
+          tries++;
           if (b.dataset.ok === '1') {
-            judgeOK++;
-            score += 25;
+            // 첫 시도 정답만 온전히 인정, 다시 골라 맞힌 건 작은 점수
+            const first = tries === 1;
+            if (first) judgeOK++;
+            score += first ? 25 : 5;
             sfx.good();
             ui.setScore(score);
-            toast(ui.body, `⭕ 훌륭한 판단! ${data.why}`, 1600);
+            toast(ui.body, first ? `⭕ 훌륭한 판단! ${data.why}` : `👍 두 번째 만에 맞혔어요. ${data.why}`, 1600);
             modal.remove();
             paused = false;
           } else {
             sfx.bad();
+            b.disabled = true;
             b.style.background = '#ffecec';
+            b.style.opacity = '0.6';
             toast(ui.body, `🤔 다시 생각해 봐요! 가장 안전하고 책임감 있는 선택은?`, 1400);
           }
         });
@@ -154,7 +163,7 @@ export default {
       help: '왼쪽/오른쪽을 탭해 장애물을 피해요!<br>가끔 <b>판단 정지</b> 질문이 나오면 가장 안전한 답을 골라요 🚦',
     }, () => {
       alive = true;
-      loop();
+      rafId = requestAnimationFrame(loop);
       spawnIv = setInterval(spawnObstacle, 750);
       tickIv = setInterval(() => {
         if (!alive || paused) return;
@@ -171,7 +180,7 @@ export default {
           ctx.finish({
             score,
             stars: judgeOK === 3 && ratio >= 0.5 ? 3 : ratio >= 0.35 ? 2 : 1,
-            msg: `장애물 ${dodged}개 회피, 판단 퀴즈 ${judgeOK}/3 성공!<br>AI 운전도 사람의 확인과 책임이 함께해야 안전해요 🦺`,
+            msg: `장애물 ${dodged}개 회피, 판단 퀴즈 ${judgeOK}/3 첫 시도 성공!<br>AI 운전도 사람의 확인과 책임이 함께해야 안전해요 🦺`,
           });
         }
       }, 1000);
