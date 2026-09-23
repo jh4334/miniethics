@@ -46,6 +46,44 @@ export function gameScene(mgr: SceneManager) {
     const onBack = () => requestQuit();
     window.addEventListener('miniethics-back', onBack);
 
+    // 앱을 벗어나면(홈 버튼·다른 앱·화면 잠금) 게임을 멈춘다.
+    // 게임마다 타이머가 따로 돌아 일시정지 API가 없으므로, 게임을 정리하고 다시 도전을 안내한다.
+    // 되돌아왔을 때 시간이 다 흘러 있거나 점수가 조용히 깎이는 일을 막는다.
+    function interrupt() {
+      if (done || !cleanup) return;
+      const stop = cleanup;
+      cleanup = undefined;
+      stop();
+      container.replaceChildren();
+      scene.querySelector('.quit-confirm')?.remove();
+      const pause = el('div', 'quit-confirm');
+      const card = el('div', 'card quit-card');
+      card.innerHTML = `
+        <div style="font-size:64px">😴</div>
+        <h2>게임이 잠시 멈췄어요</h2>
+        <p>앱을 벗어나서 「${lesson.gameName}」을 멈췄어요.<br>준비되면 처음부터 다시 도전해요!</p>`;
+      const btns = el('div', 'quit-btns');
+      btns.append(
+        button('🔄 다시 도전', () => {
+          if (done) return;
+          done = true;
+          mgr.go('game', { lessonId: lesson.id });
+        }, 'btn big mint'),
+        button('🗺️ 월드맵', () => {
+          if (done) return;
+          done = true;
+          mgr.go('worldmap');
+        }, 'btn ghost')
+      );
+      card.appendChild(btns);
+      pause.appendChild(card);
+      scene.appendChild(pause);
+    }
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') interrupt();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
     // 게임 방법 안내 오버레이 → 확인 후 게임 마운트
     const overlay = el('div', 'howto-overlay');
     const card = el('div', 'card howto-card');
@@ -74,6 +112,7 @@ export function gameScene(mgr: SceneManager) {
 
     return () => {
       window.removeEventListener('miniethics-back', onBack);
+      document.removeEventListener('visibilitychange', onVisibility);
       if (cleanup) cleanup();
     };
   };

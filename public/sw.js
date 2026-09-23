@@ -1,6 +1,8 @@
-const SHELL_CACHE = 'miniethics-shell-v2';
-const RUNTIME_CACHE = 'miniethics-runtime-v2';
+const SHELL_CACHE = 'miniethics-shell-v3';
+const RUNTIME_CACHE = 'miniethics-runtime-v3';
 const RUNTIME_LIMIT = 160;
+// 학교 와이파이가 느리거나 30대가 동시에 접속할 때, 캐시가 있으면 이 시간 이상 기다리지 않는다
+const NAVIGATION_TIMEOUT_MS = 3000;
 const SHELL_ASSETS = [
   './',
   './index.html',
@@ -59,12 +61,37 @@ async function cacheRuntime(request, response) {
 }
 
 async function respondToNavigation(request) {
-  try {
-    return await fetch(request);
-  } catch {
-    const fallback = await caches.match('./index.html');
-    return fallback ?? Response.error();
+  const network = fetch(request);
+  const fallback = await caches.match('./index.html');
+  if (!fallback) {
+    try {
+      return await network;
+    } catch {
+      return Response.error();
+    }
   }
+  // 네트워크 우선이되, 응답이 늦으면 캐시로 즉시 시작한다. 늦게 온 새 셸은 다음 실행을 위해 캐시에 반영한다.
+  let timer;
+  const timeout = new Promise((resolve) => {
+    timer = setTimeout(() => resolve(null), NAVIGATION_TIMEOUT_MS);
+  });
+  const fresh = network.then(
+    async (response) => {
+      if (isCacheable(response)) {
+        try {
+          const cache = await caches.open(SHELL_CACHE);
+          await cache.put('./index.html', response.clone());
+        } catch {
+          /* 캐시 갱신 실패는 무시 */
+        }
+      }
+      return response;
+    },
+    () => null
+  );
+  const winner = await Promise.race([fresh, timeout]);
+  clearTimeout(timer);
+  return winner ?? fallback;
 }
 
 async function respondToAsset(request) {

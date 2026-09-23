@@ -5,6 +5,7 @@ import { save } from '../core/save';
 import { audio } from '../core/audio';
 import { charImg, sceneBg } from '../assets-manifest';
 import { prefersReducedMotion } from '../core/motion';
+import { openTeacherPanel } from '../ui/teacher-panel';
 
 export function worldmapScene(mgr: SceneManager) {
   return (root: HTMLElement) => {
@@ -32,13 +33,17 @@ export function worldmapScene(mgr: SceneManager) {
     scene.appendChild(path);
 
     // 현재 도전할 차시: 아직 클리어하지 않은 첫 번째 열린 차시
+    // (하루 한 차시 규칙으로 다음 섬이 잠겼으면 마지막으로 열린 섬에 머문다)
+    const openLessons = LESSONS.filter((l) => save.isUnlocked(l.id));
     const current =
-      LESSONS.find((l) => save.isUnlocked(l.id) && !save.record(l.id).cleared) ??
-      LESSONS[LESSONS.length - 1];
+      openLessons.find((l) => !save.record(l.id).cleared) ??
+      openLessons[openLessons.length - 1] ??
+      LESSONS[0];
 
     // 섬 배치
     LESSONS.forEach((lesson) => {
-      const unlocked = save.isUnlocked(lesson.id);
+      const lock = save.lockState(lesson.id);
+      const unlocked = lock === 'open';
       const rec = save.record(lesson.id);
       const isl = el('button', 'island');
       isl.style.left = `${lesson.x}%`;
@@ -55,18 +60,22 @@ export function worldmapScene(mgr: SceneManager) {
         ? rec.cleared
           ? `완료, 별 ${rec.stars}개`
           : '도전 가능'
-        : previous
-          ? `잠김, ${previous.id}차시를 먼저 완료해 주세요`
-          : '잠김';
+        : lock === 'today'
+          ? '잠김, 다음 수업 날에 열려요'
+          : previous
+            ? `잠김, ${previous.id}차시를 먼저 완료해 주세요`
+            : '잠김';
       isl.setAttribute('aria-label', `${lesson.id}차시 ${lesson.islandName}, ${stateLabel}`);
 
       isl.innerHTML = `
         <div class="island-num">${lesson.id}</div>
         <div class="island-img">${unlocked ? lesson.emoji : ''}
-          ${!unlocked ? '<span class="lock-badge">🔒</span>' : ''}
+          ${lock === 'prev' ? '<span class="lock-badge">🔒</span>' : ''}
+
           ${unlocked && !lesson.playable ? '<span class="soon-badge">준비 중</span>' : ''}
         </div>
         ${rec.cleared ? `<div class="island-stars">${starsHtml(rec.stars)}</div>` : ''}
+        ${lock === 'today' ? '<div class="island-next" aria-hidden="true">🌙 다음 수업 날 열려요</div>' : ''}
         <div class="island-label">${lesson.islandName}</div>`;
 
       isl.addEventListener('click', () => {
@@ -75,9 +84,11 @@ export function worldmapScene(mgr: SceneManager) {
           // 왜 잠겨 있는지 + 무엇을 하면 열리는지 안내
           const prev = LESSONS.find((x) => x.id === lesson.id - 1);
           showMapToast(
-            prev
-              ? `🔒 먼저 ${prev.id}차시 「${prev.islandName}」을 클리어하면 열려요!`
-              : '🔒 아직 잠겨 있어요!'
+            lock === 'today'
+              ? '🌙 오늘 배움은 여기까지! 다음 수업 날에 열려요.'
+              : prev
+                ? `🔒 먼저 ${prev.id}차시 「${prev.islandName}」을 클리어하면 열려요!`
+                : '🔒 아직 잠겨 있어요!'
           );
           if (!prefersReducedMotion()) {
             isl.animate(
@@ -160,25 +171,23 @@ export function worldmapScene(mgr: SceneManager) {
       card.innerHTML = `
         <div style="font-size:52px">⚙️</div>
         <h2>설정</h2>
-        <p>진행을 처음부터 다시 시작할 수 있어요.<br>
-        (다음 친구가 이 태블릿을 쓸 때 선생님이 사용해요)</p>
+        <p>차시 열기와 기록 초기화는<br>선생님 메뉴에서 할 수 있어요.</p>
         <p style="font-size:15px">버전 v${__APP_VERSION__}${errCount ? ` · 최근 오류 기록 ${errCount}건` : ''}</p>`;
       const btns = el('div', 'quit-btns');
       const summaryBtn = button('📋 진행 요약', () => {
         overlay.remove();
         openSummary();
       }, 'btn');
-      const reset = button('🗑️ 처음부터 다시 시작', () => {
-        // 실수 방지 2단계 확인
-        reset.remove();
-        const really = button(`정말 초기화 (⭐ ${save.totalStars()}개 삭제)`, () => {
-          save.reset();
-          mgr.go('title');
-        }, 'btn pink');
-        btns.prepend(really);
+      const teacher = button('👩‍🏫 선생님 메뉴', () => {
+        overlay.remove();
+        openTeacherPanel({
+          host: scene,
+          onChanged: () => mgr.go('worldmap'),
+          onReset: () => mgr.go('title')
+        });
       }, 'btn ghost');
       const close = button('닫기', () => overlay.remove(), 'btn mint');
-      btns.append(summaryBtn, reset, close);
+      btns.append(summaryBtn, teacher, close);
       card.appendChild(btns);
       overlay.appendChild(card);
       scene.appendChild(overlay);
@@ -237,6 +246,17 @@ export function worldmapScene(mgr: SceneManager) {
       overlay.appendChild(card);
       scene.appendChild(overlay);
       audio.fanfare();
+    }
+
+    // ---------- 저장 불가 기기 경고 ----------
+    if (!save.storageOk()) {
+      const warn = el(
+        'div',
+        'storage-warning',
+        '⚠️ 이 기기는 기록이 저장되지 않아요. 앱을 닫으면 별과 진행이 사라져요. 선생님께 알려 주세요.'
+      );
+      warn.setAttribute('role', 'alert');
+      scene.appendChild(warn);
     }
 
     root.appendChild(scene);
