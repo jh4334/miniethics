@@ -4,6 +4,7 @@ import { LESSONS } from '../data/curriculum';
 import { save } from '../core/save';
 import { audio } from '../core/audio';
 import { charImg, sceneBg } from '../assets-manifest';
+import { prefersReducedMotion } from '../core/motion';
 
 export function worldmapScene(mgr: SceneManager) {
   return (root: HTMLElement) => {
@@ -44,7 +45,20 @@ export function worldmapScene(mgr: SceneManager) {
       isl.style.top = `${lesson.y}%`;
       isl.style.setProperty('--island-color', lesson.color);
       if (!unlocked) isl.classList.add('locked');
-      if (lesson.id === current.id && unlocked) isl.classList.add('current');
+      isl.disabled = !unlocked;
+      if (lesson.id === current.id && unlocked) {
+        isl.classList.add('current');
+        isl.setAttribute('aria-current', 'step');
+      }
+      const previous = LESSONS.find((candidate) => candidate.id === lesson.id - 1);
+      const stateLabel = unlocked
+        ? rec.cleared
+          ? `완료, 별 ${rec.stars}개`
+          : '도전 가능'
+        : previous
+          ? `잠김, ${previous.id}차시를 먼저 완료해 주세요`
+          : '잠김';
+      isl.setAttribute('aria-label', `${lesson.id}차시 ${lesson.islandName}, ${stateLabel}`);
 
       isl.innerHTML = `
         <div class="island-num">${lesson.id}</div>
@@ -65,15 +79,17 @@ export function worldmapScene(mgr: SceneManager) {
               ? `🔒 먼저 ${prev.id}차시 「${prev.islandName}」을 클리어하면 열려요!`
               : '🔒 아직 잠겨 있어요!'
           );
-          isl.animate(
-            [
-              { transform: 'translate(-50%,-50%) rotate(0deg)' },
-              { transform: 'translate(-50%,-50%) rotate(-4deg)' },
-              { transform: 'translate(-50%,-50%) rotate(4deg)' },
-              { transform: 'translate(-50%,-50%) rotate(0deg)' }
-            ],
-            { duration: 300 }
-          );
+          if (!prefersReducedMotion()) {
+            isl.animate(
+              [
+                { transform: 'translate(-50%,-50%) rotate(0deg)' },
+                { transform: 'translate(-50%,-50%) rotate(-4deg)' },
+                { transform: 'translate(-50%,-50%) rotate(4deg)' },
+                { transform: 'translate(-50%,-50%) rotate(0deg)' }
+              ],
+              { duration: 300 }
+            );
+          }
           return;
         }
         audio.click();
@@ -100,6 +116,8 @@ export function worldmapScene(mgr: SceneManager) {
       let toast = scene.querySelector<HTMLElement>('.map-toast');
       if (!toast) {
         toast = el('div', 'map-toast');
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
         scene.appendChild(toast);
       }
       toast.textContent = msg;
@@ -111,7 +129,7 @@ export function worldmapScene(mgr: SceneManager) {
     // 상단 HUD
     const hud = el('div', 'hud');
     const home = button('🏠', () => mgr.go('title'), 'icon-btn', '타이틀로 가기');
-    const title = el('div', 'hud-title', '🗺️ AI 윤리 월드맵');
+    const title = el('h1', 'hud-title', '🗺️ AI 윤리 월드맵');
     const spacer = el('div', 'spacer');
     const allCleared = save.clearedCount() === LESSONS.length;
     const total = el(
@@ -122,7 +140,8 @@ export function worldmapScene(mgr: SceneManager) {
     const mute = button(audio.isMuted() ? '🔇' : '🔊', () => {
       audio.setMuted(!audio.isMuted());
       mute.textContent = audio.isMuted() ? '🔇' : '🔊';
-    }, 'icon-btn', '소리 켜기/끄기');
+      mute.setAttribute('aria-label', audio.isMuted() ? '소리 켜기' : '소리 끄기');
+    }, 'icon-btn', audio.isMuted() ? '소리 켜기' : '소리 끄기');
     const settings = button('⚙️', () => openSettings(), 'icon-btn', '설정');
     hud.append(home, title, spacer, total, mute, settings);
     scene.appendChild(hud);

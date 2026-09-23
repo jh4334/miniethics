@@ -296,7 +296,24 @@ export const LESSONS: Lesson[] = [
 ];
 
 export function getLesson(id: number): Lesson {
-  const l = LESSONS.find((x) => x.id === id);
-  if (!l) throw new Error(`unknown lesson: ${id}`);
-  return l;
+  return getLessonFromParam(id);
+}
+
+export class UnknownLessonError extends Error {
+  readonly value: unknown;
+
+  constructor(value: unknown) {
+    super('unknown lesson');
+    this.name = 'UnknownLessonError';
+    this.value = value;
+  }
+}
+
+export function getLessonFromParam(value: unknown): Lesson {
+  if (typeof value !== 'number' || !Number.isFinite(value) || !Number.isInteger(value)) {
+    throw new UnknownLessonError(value);
+  }
+  const lesson = LESSONS.find((candidate) => candidate.id === value);
+  if (!lesson) throw new UnknownLessonError(value);
+  return lesson;
 }

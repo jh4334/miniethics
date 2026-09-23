@@ -5,6 +5,7 @@
 import type { MiniGame, GameCtx } from './registry';
 import { el, button, floater } from '../ui/components';
 import { charImg } from '../assets-manifest';
+import { prefersReducedMotion } from '../core/motion';
 
 interface InfoCard {
   emoji: string;
@@ -172,10 +173,12 @@ export const game03: MiniGame = {
                 hearts--;
                 ctx.audio.bad();
                 floater(wrap, 1050, 320, '개인정보 도난! 💥', false);
-                monster.animate(
-                  [{ transform: 'translateY(-50%) scale(1)' }, { transform: 'translateY(-50%) scale(1.35)' }, { transform: 'translateY(-50%) scale(1)' }],
-                  { duration: 350 }
-                );
+                if (!prefersReducedMotion()) {
+                  monster.animate(
+                    [{ transform: 'translateY(-50%) scale(1)' }, { transform: 'translateY(-50%) scale(1.35)' }, { transform: 'translateY(-50%) scale(1)' }],
+                    { duration: 350 }
+                  );
+                }
                 resolve(item, false);
                 if (hearts <= 0) {
                   finish();

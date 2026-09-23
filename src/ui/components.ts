@@ -22,6 +22,7 @@ export function button(
   ariaLabel?: string
 ): HTMLButtonElement {
   const b = el('button', className);
+  b.type = 'button';
   b.innerHTML = label;
   if (ariaLabel) b.setAttribute('aria-label', ariaLabel);
   b.addEventListener('click', () => {

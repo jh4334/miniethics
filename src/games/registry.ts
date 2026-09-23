@@ -45,6 +45,8 @@ const GAMES: MiniGame[] = [
   game12
 ];
 
+export const GAME_IDS = GAMES.map((game) => game.lessonId);
+
 export function getGame(lessonId: number): MiniGame | undefined {
   return GAMES.find((g) => g.lessonId === lessonId);
 }

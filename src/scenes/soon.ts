@@ -1,10 +1,10 @@
 import type { SceneManager, SceneParams } from '../core/scene';
 import { el, button } from '../ui/components';
-import { getLesson } from '../data/curriculum';
+import { getLessonFromParam } from '../data/curriculum';
 
 export function soonScene(mgr: SceneManager) {
   return (root: HTMLElement, params: SceneParams) => {
-    const lesson = getLesson(Number(params.lessonId));
+    const lesson = getLessonFromParam(params.lessonId);
     const scene = el('div', 'scene soon-scene');
     scene.innerHTML = `
       <div class="soon-emoji">${lesson.emoji}</div>

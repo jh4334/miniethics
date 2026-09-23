@@ -1,12 +1,12 @@
 import type { SceneManager, SceneParams } from '../core/scene';
 import { el, button } from '../ui/components';
-import { getLesson } from '../data/curriculum';
+import { getLessonFromParam } from '../data/curriculum';
 import { getGame } from '../games/registry';
 import { audio } from '../core/audio';
 
 export function gameScene(mgr: SceneManager) {
   return (root: HTMLElement, params: SceneParams) => {
-    const lesson = getLesson(Number(params.lessonId));
+    const lesson = getLessonFromParam(params.lessonId);
     const game = getGame(lesson.id);
     if (!game) {
       mgr.go('soon', { lessonId: lesson.id });

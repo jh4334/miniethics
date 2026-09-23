@@ -1,7 +1,6 @@
-// 에셋 목록 - 같은 폴더에 같은 이름의 PNG를 넣으면 자동으로 PNG를 사용합니다.
-// (PNG가 없으면 기본 SVG 플레이스홀더 사용. 자세한 방법은 docs/asset-guide.md)
+// 완성된 프로덕션 에셋 목록. 선택적 WebP 최적화본 뒤 PNG, 캐릭터는 SVG 폴백까지 사용합니다.
 
-const BASE = {
+export const CHARACTER_ASSETS = {
   /** 주인공 요원 (권장 1024x1024, 투명 배경) */
   hero: './assets/common/hero',
   /** 가이드 로봇 '에티' */
@@ -24,14 +23,14 @@ const BASE = {
   char12: './assets/game12/char12'
 } as const;
 
-export type AssetKey = keyof typeof BASE;
+export type AssetKey = keyof typeof CHARACTER_ASSETS;
 
 /** 캐릭터 이미지 엘리먼트 생성: WebP → PNG → SVG 순서로 폴백 */
 export function charImg(key: string, className = '', alt = ''): HTMLImageElement {
   const img = document.createElement('img');
   if (className) img.className = className;
   img.alt = alt;
-  const base = BASE[key as AssetKey] ?? BASE.eti;
+  const base = CHARACTER_ASSETS[key as AssetKey] ?? CHARACTER_ASSETS.eti;
   img.src = `${base}.webp`;
   img.onerror = () => {
     if (img.src.endsWith('.webp')) {
