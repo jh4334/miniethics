@@ -1,6 +1,7 @@
 // localStorage 기반 진행도 저장
 
 import { z } from 'zod';
+import { classroom, localDay } from './classroom';
 
 const KEY = 'miniethics-save-v1';
 
@@ -9,7 +10,12 @@ export interface LessonRecord {
   bestScore: number; // 게임 점수 0~100
   quizBest: number; // 퀴즈 정답 수 0~3
   cleared: boolean;
+  /** 처음 클리어한 날(기기 현지 YYYY-MM-DD). 하루 한 차시 규칙에 사용. 예전 기록에는 없음 */
+  clearedAt?: string;
 }
+
+/** open: 도전 가능 · prev: 앞 차시 미완료 · today: 하루 한 차시 규칙으로 내일 열림 */
+export type LockState = 'open' | 'prev' | 'today';
 
 export interface SaveData {
   records: Record<number, LessonRecord>;
@@ -19,7 +25,8 @@ const LessonRecordSchema = z.object({
   stars: z.number().finite(),
   bestScore: z.number().finite(),
   quizBest: z.number().finite(),
-  cleared: z.boolean()
+  cleared: z.boolean(),
+  clearedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().catch(undefined)
 });
 
 const StoredSaveSchema = z.object({
@@ -57,7 +64,8 @@ export function parseSaveData(raw: string | null): SaveData {
       stars: clampInt(record.data.stars, 0, 3),
       bestScore: clampInt(record.data.bestScore, 0, 100),
       quizBest: clampInt(record.data.quizBest, 0, 3),
-      cleared: record.data.cleared
+      cleared: record.data.cleared,
+      ...(record.data.clearedAt ? { clearedAt: record.data.clearedAt } : {})
     };
   }
   return out;
@@ -78,6 +86,22 @@ function persist() {
   }
 }
 
+/** 부팅 시 쓰기→읽기 자가 검사. iOS 프라이빗 모드·쿠키 차단·MDM에서 기록이 조용히 사라지는 것을 알리기 위함 */
+function probeStorage(): boolean {
+  try {
+    const probe = 'miniethics-probe';
+    const value = String(Date.now());
+    localStorage.setItem(probe, value);
+    const ok = localStorage.getItem(probe) === value;
+    localStorage.removeItem(probe);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
+const storageOk = probeStorage();
+
 export const save = {
   record(lessonId: number): LessonRecord {
     return (
@@ -93,15 +117,36 @@ export const save = {
       stars: Math.max(prev.stars, clampInt(stars, 0, 3)),
       bestScore: Math.max(prev.bestScore, clampInt(score, 0, 100)),
       quizBest: Math.max(prev.quizBest, clampInt(quizCorrect, 0, 3)),
-      cleared: true
+      cleared: true,
+      // 다시 하기로 날짜가 갱신되면 이미 열린 다음 차시가 다시 잠기므로 첫 클리어 날만 남긴다
+      clearedAt: prev.cleared ? prev.clearedAt : localDay()
     };
+    if (!data.records[lessonId].clearedAt) delete data.records[lessonId].clearedAt;
     persist();
   },
 
   /** n차시가 열려 있는가? (1차시는 항상, 이후는 직전 차시 클리어 시) */
   isUnlocked(lessonId: number): boolean {
-    if (lessonId <= 1) return true;
-    return save.record(lessonId - 1).cleared;
+    return save.lockState(lessonId) === 'open';
+  },
+
+  /**
+   * 잠금 상태. 교사 해금 범위면 항상 open.
+   * 하루 한 차시 규칙이 켜져 있으면 직전 차시를 "오늘" 처음 깬 경우 다음 차시는 내일 열린다.
+   */
+  lockState(lessonId: number, today = localDay()): LockState {
+    if (lessonId <= 1) return 'open';
+    const settings = classroom.get();
+    if (lessonId <= settings.unlockThrough) return 'open';
+    const prev = save.record(lessonId - 1);
+    if (!prev.cleared) return 'prev';
+    if (settings.dailyLimit && prev.clearedAt === today) return 'today';
+    return 'open';
+  },
+
+  /** 이 기기에서 진행 기록이 실제로 저장되는가 */
+  storageOk(): boolean {
+    return storageOk;
   },
 
   totalStars(): number {

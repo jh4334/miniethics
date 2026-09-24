@@ -64,7 +64,8 @@ describe('progress save boundary', () => {
       stars: 3,
       bestScore: 0,
       quizBest: 0,
-      cleared: true
+      cleared: true,
+      clearedAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/)
     });
     expect(localStorage.getItem('miniethics-save-v1')).not.toContain('null');
   });
@@ -80,7 +81,8 @@ describe('progress save boundary', () => {
       stars: 2,
       bestScore: 75,
       quizBest: 2,
-      cleared: true
+      cleared: true,
+      clearedAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/)
     });
   });
 });

@@ -21,12 +21,12 @@ describe('development toolchain security contract', () => {
   it('pins supported Vite, Vitest, and Node versions', () => {
     expect(packageJson).toMatchObject({
       engines: { node: '>=22.12.0' },
-      devDependencies: { vite: '8.2.1', vitest: '4.1.10' }
+      devDependencies: { vite: '8.2.1', vitest: '4.1.11' }
     });
     expect(packageLock).toMatchObject({
       packages: {
         'node_modules/vite': { version: '8.2.1' },
-        'node_modules/vitest': { version: '4.1.10' }
+        'node_modules/vitest': { version: '4.1.11' }
       }
     });
     expect(deployWorkflow).toContain('node-version: 22.12.0');
